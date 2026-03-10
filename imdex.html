@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>NortLaundry CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overscroll-behavior:none}
+#root{height:100%;background:#F2F2F7;font-family:-apple-system,'DM Sans',sans-serif;-webkit-font-smoothing:antialiased;color:#1C1C1E}
+input,select,textarea,button{font-family:-apple-system,'DM Sans',sans-serif;-webkit-appearance:none;appearance:none;outline:none}
+input,select,textarea{font-size:17px}
+::-webkit-scrollbar{display:none}
+.ios-nav{background:rgba(242,242,247,0.88);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);border-bottom:0.5px solid rgba(60,60,67,0.2)}
+.ios-tab{background:rgba(255,255,255,0.92);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);border-top:0.5px solid rgba(60,60,67,0.18)}
+.ios-group{background:#FFFFFF;border-radius:12px;overflow:hidden}
+.ios-sh{font-size:13px;font-weight:400;color:#6D6D72;text-transform:uppercase;letter-spacing:0.04em;padding:22px 20px 6px;margin-bottom:0}
+.ios-row{display:flex;align-items:center;padding:12px 16px;background:#FFFFFF;font-size:17px;color:#1C1C1E}
+.ios-sep{height:0.5px;background:rgba(60,60,67,0.18);margin-left:16px}
+.ios-inp{width:100%;background:#F2F2F7;border:none;border-radius:10px;padding:13px 14px;color:#1C1C1E;font-size:17px;font-family:-apple-system,'DM Sans',sans-serif;display:block}
+.ios-inp:focus{background:#E8E8ED}
+.ios-seg{display:flex;background:#E4E4EB;border-radius:10px;padding:2px;}
+.ios-seg-btn{flex:1;padding:7px 4px;border-radius:8px;border:none;font-size:13px;font-weight:500;cursor:pointer;font-family:-apple-system,'DM Sans',sans-serif;color:#3C3C43;background:transparent;transition:all 0.18s}
+.ios-seg-btn.active{background:#FFFFFF;color:#1C1C1E;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,0.14),0 1px 2px rgba(0,0,0,0.1)}
+.ios-chip{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap}
+.ios-btn-primary{width:100%;padding:16px;border-radius:14px;border:none;background:#007AFF;color:#FFF;font-size:17px;font-weight:600;cursor:pointer;font-family:-apple-system,'DM Sans',sans-serif;letter-spacing:-0.02em;margin-top:10px}
+.ios-btn-primary:active{opacity:0.8;transform:scale(0.99)}
+.pressable{transition:transform 0.12s,opacity 0.12s}
+.pressable:active{transform:scale(0.98);opacity:0.9}
+.sheet-back{position:absolute;inset:0;background:rgba(0,0,0,0.45)}
+@keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(12px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.fu{animation:slideUp 0.28s cubic-bezier(0.25,0.46,0.45,0.94) both}
+.shake{animation:shake 0.35s ease}
+@media print{.no-print{display:none!important}.print-area{display:block!important;position:fixed;top:0;left:0;width:100%;background:#fff;padding:24px;z-index:9999}}
+.print-area{display:none}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(function(){
+var R=React,C=R.createElement,useState=R.useState,useEffect=R.useEffect,useRef=R.useRef;
+
+// === TOKENS ===
+var BLU=”#007AFF”,GRN=”#34C759”,RED=”#FF3B30”,ORG=”#FF9500”,PUR=”#AF52DE”,TEA=”#32ADE6”,PNK=”#FF2D55”;
+var TXT=”#1C1C1E”,SUB=”#3C3C43”,MUT=”#8E8E93”;
+var BG=”#F2F2F7”,CRD=”#FFFFFF”,BDR=”#E5E5EA”;
+var GLT=”#E9F9EE”,RLT=”#FFF1F0”,OLT=”#FFF5E5”,BDL=”#EBF4FF”,PLT=”#F5EEFF”;
+var SHD=“0 1px 1px rgba(0,0,0,0.06),0 2px 6px rgba(0,0,0,0.05)”;
+var SS=”‘DM Sans’,-apple-system,sans-serif”;
+var MN=”‘DM Mono’,‘Courier New’,monospace”;
+
+// === STORAGE ===
+var MEM={};
+function lsGet(k){try{var v=localStorage.getItem(k);if(v!==null)return JSON.parse(v);}catch(e){}return MEM[k]!==undefined?MEM[k]:null;}
+function lsSet(k,v){MEM[k]=v;try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}return true;}
+function lsDel(k){delete MEM[k];try{localStorage.removeItem(k);}catch(e){}return true;}
+
+// === HELPERS ===
+function today(){var d=new Date();return(d.getMonth()+1).toString().padStart(2,“0”)+”/”+d.getDate().toString().padStart(2,“0”)+”/”+d.getFullYear();}
+function todayISO(){return new Date().toISOString().split(“T”)[0];}
+function mkId(p){return(p||“ID”)+”-”+Date.now().toString().slice(-6)+Math.random().toString(36).slice(2,4).toUpperCase();}
+function fmtPeso(n){return “\u20B1”+(parseFloat(n)||0).toLocaleString(“en-PH”,{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmtDate(d){if(!d||d==”–”)return “–”;try{return new Date(d).toLocaleDateString(“en-PH”,{month:“short”,day:“numeric”,year:“numeric”});}catch(e){return d;}}
+function hashPw(s){var h=0;for(var i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h=h&h;}return h.toString(36);}
+function e(t,p){var a=[t,p||null];for(var i=2;i<arguments.length;i++)a.push(arguments[i]);return R.createElement.apply(R,a);}
+function div(p){var a=[“div”,p||null];for(var i=1;i<arguments.length;i++)a.push(arguments[i]);return R.createElement.apply(R,a);}
+function sp(p){var a=[“span”,p||null];for(var i=1;i<arguments.length;i++)a.push(arguments[i]);return R.createElement.apply(R,a);}
+function btn(p){var a=[“button”,p||null];for(var i=1;i<arguments.length;i++)a.push(arguments[i]);return R.createElement.apply(R,a);}
+function inp(p){return R.createElement(“input”,p||null);}
+function sel(p){var a=[“select”,p||null];for(var i=2;i<arguments.length;i++)a.push(arguments[i]);return R.createElement.apply(R,a);}
+function opt(v,l){return C(“option”,{key:v,value:v},l||v);}
+function ta(p){return C(“textarea”,p||null);}
+
+// === CONSTANTS ===
+var ROLES={admin:“Admin”,agent:“Agent”,operator:“Operator”,staff:“Staff”};
+var RCOL={admin:RED,agent:BLU,operator:GRN,staff:ORG};
+var SVC=[“Wash & Fold”,“Dry Cleaning”,“Press Only”,“Wash & Press”,“Delicate Wash”,“Hospital Grade”,“Linen Service”,“Uniform Service”];
+var CTYPES=[“Hotel”,“Hospital”,“Restaurant”,“School”,“Corporate”,“Individual”,“Other”];
+var TCOL={Hotel:BLU,Hospital:RED,Restaurant:ORG,School:GRN,Corporate:PUR,Individual:TEA,Other:MUT};
+var ORDS={
+received:{label:“Received”,color:BLU,bg:BDL,icon:“📥”},
+processing:{label:“Processing”,color:ORG,bg:OLT,icon:“⚙️”},
+ready:{label:“Ready”,color:GRN,bg:GLT,icon:“✅”},
+delivered:{label:“Delivered”,color:MUT,bg:BG,icon:“🚚”},
+cancelled:{label:“Cancelled”,color:RED,bg:RLT,icon:“❌”}
+};
+var CHEMS=[“HE Liquid Detergent”,“Hospital Grade Bleach”,“SUPER Fabcon HE Blue”,“SUPER Fabcon Violet”,“SUPER Fabcon Pink”,“Fabric Cologne DNSY”,“Fabric Cologne Comfy”,“Powdered Soap A-Plus”,“Alkali Builder”,“OxyGuard”,“Sour/Neutralizer”,“Enzyme Concentrate”];
+var CUNIT={HE:“L”,“Hospital Grade Bleach”:“L”,“SUPER Fabcon HE Blue”:“L”,“SUPER Fabcon Violet”:“L”,“SUPER Fabcon Pink”:“L”,“Fabric Cologne DNSY”:“L”,“Fabric Cologne Comfy”:“L”,“Powdered Soap A-Plus”:“kg”,“Alkali Builder”:“kg”,OxyGuard:“kg”,“Sour/Neutralizer”:“L”,“Enzyme Concentrate”:“L”};
+var CPRICE={“HE Liquid Detergent”:75,“Hospital Grade Bleach”:70,“SUPER Fabcon HE Blue”:75,“SUPER Fabcon Violet”:90,“SUPER Fabcon Pink”:90,“Fabric Cologne DNSY”:325,“Fabric Cologne Comfy”:345,“Powdered Soap A-Plus”:86.5,“Alkali Builder”:320,“OxyGuard”:420,“Sour/Neutralizer”:210,“Enzyme Concentrate”:680};
+
+// === SEED DATA ===
+function initData(){
+if((lsGet(“nlcrm_users”)||[]).length>0)return;
+lsSet(“nlcrm_users”,[
+{id:“USR-001”,name:“John Doe”,email:“admin@nortkem.ph”,password:hashPw(“nortkem123”),role:“admin”,company:“Global Nortkem Marketing Inc.”,phone:”+63 45 300 0001”,active:true,createdAt:“2026-01-01”},
+{id:“USR-002”,name:“Maria Santos”,email:“agent@nortkem.ph”,password:hashPw(“agent123”),role:“agent”,company:“Global Nortkem Marketing Inc.”,phone:”+63 912 100 0001”,active:true,createdAt:“2026-01-15”},
+{id:“USR-003”,name:“Pedro Reyes”,email:“operator@hotel.ph”,password:hashPw(“hotel123”),role:“operator”,company:“Clark Marriott Hotel”,phone:”+63 912 200 0001”,active:true,createdAt:“2026-02-01”}
+]);
+lsSet(“nlcrm_clients”,[
+{id:“CLT-001”,name:“Clark Marriott Hotel”,type:“Hotel”,contact:“Maria Santos”,phone:”+63 45 499 0000”,email:“laundry@clarkmarriott.com”,address:“Mimosa Drive, Clark Freeport Zone”,city:“Angeles City”,agentId:“USR-002”,totalOrders:28,totalSpent:84500,outstandingBalance:7400,creditLimit:50000,paymentTerms:“Net 7”,joinDate:“2025-01-15”,notes:“VIP client. No bleach on colored linens. Weekly billing every Friday.”,preferences:“Warm wash only, extra softener”,active:true},
+{id:“CLT-002”,name:“St. Camillus Medical Center”,type:“Hospital”,contact:“Engr. Reyes”,phone:”+63 45 322 1234”,email:“supply@stcamillus.ph”,address:“Don Juico Ave, Malabanias”,city:“Angeles City”,agentId:“USR-002”,totalOrders:45,totalSpent:156000,outstandingBalance:5440,creditLimit:100000,paymentTerms:“Net 15”,joinDate:“2024-11-20”,notes:“Hospital grade wash required. Strict 24hr turnaround.”,preferences:“Hospital grade chemicals only”,active:true},
+{id:“CLT-003”,name:“Quest Hotel Clark”,type:“Hotel”,contact:“Ms. Cruz”,phone:”+63 45 499 8888”,email:“housekeeping@questclark.ph”,address:“M.A. Roxas Highway”,city:“Angeles City”,agentId:“USR-002”,totalOrders:19,totalSpent:52000,outstandingBalance:3120,creditLimit:30000,paymentTerms:“Net 7”,joinDate:“2025-02-08”,notes:“Delivery Monday and Thursday only.”,preferences:“Fold neatly, extra starch on uniforms”,active:true},
+{id:“CLT-004”,name:“Sacred Heart Hospital”,type:“Hospital”,contact:“Mr. Bautista”,phone:”+63 45 888 4567”,email:“admin@sacredheart.ph”,address:“Sto. Rosario St”,city:“Angeles City”,agentId:“USR-002”,totalOrders:33,totalSpent:98400,outstandingBalance:0,creditLimit:80000,paymentTerms:“Net 15”,joinDate:“2024-12-01”,notes:“Surgical items require separate processing.”,preferences:“OxyGuard required for surgical linens”,active:true},
+{id:“CLT-005”,name:“Royce Hotel”,type:“Hotel”,contact:“Mrs. Dizon”,phone:”+63 45 309 0000”,email:“ops@roycehotel.ph”,address:“Jose Abad Santos Ave”,city:“Angeles City”,agentId:“USR-002”,totalOrders:12,totalSpent:38000,outstandingBalance:3300,creditLimit:25000,paymentTerms:“Net 30”,joinDate:“2025-03-01”,notes:“New client. Standard terms.”,preferences:””,active:true}
+]);
+lsSet(“nlcrm_orders”,[
+{id:“ORD-001”,clientId:“CLT-001”,clientName:“Clark Marriott Hotel”,service:“Linen Service”,weightKg:185,status:“processing”,priority:“normal”,pickupDate:“2026-03-08”,dueDate:“2026-03-10”,deliveredDate:null,amount:7400,paid:false,notes:””,createdAt:“2026-03-08”,assignedTo:“Maria Santos”,agentId:“USR-002”,invoiceId:“INV-001”},
+{id:“ORD-002”,clientId:“CLT-002”,clientName:“St. Camillus Medical Center”,service:“Hospital Grade”,weightKg:68,status:“ready”,priority:“urgent”,pickupDate:“2026-03-09”,dueDate:“2026-03-10”,deliveredDate:null,amount:5440,paid:false,notes:“Urgent for ward use.”,createdAt:“2026-03-09”,assignedTo:“Maria Santos”,agentId:“USR-002”,invoiceId:“INV-002”},
+{id:“ORD-003”,clientId:“CLT-003”,clientName:“Quest Hotel Clark”,service:“Wash & Fold”,weightKg:52,status:“received”,priority:“normal”,pickupDate:“2026-03-10”,dueDate:“2026-03-12”,deliveredDate:null,amount:3120,paid:false,notes:””,createdAt:“2026-03-10”,assignedTo:””,agentId:“USR-002”,invoiceId:“INV-003”},
+{id:“ORD-004”,clientId:“CLT-004”,clientName:“Sacred Heart Hospital”,service:“Hospital Grade”,weightKg:92,status:“delivered”,priority:“normal”,pickupDate:“2026-03-06”,dueDate:“2026-03-08”,deliveredDate:“2026-03-08”,amount:7360,paid:true,notes:””,createdAt:“2026-03-06”,assignedTo:“Maria Santos”,agentId:“USR-002”,invoiceId:“INV-004”},
+{id:“ORD-005”,clientId:“CLT-001”,clientName:“Clark Marriott Hotel”,service:“Press Only”,weightKg:24,status:“delivered”,priority:“normal”,pickupDate:“2026-03-05”,dueDate:“2026-03-07”,deliveredDate:“2026-03-07”,amount:1920,paid:true,notes:””,createdAt:“2026-03-05”,assignedTo:“Maria Santos”,agentId:“USR-002”,invoiceId:“INV-005”},
+{id:“ORD-006”,clientId:“CLT-005”,clientName:“Royce Hotel”,service:“Linen Service”,weightKg:55,status:“received”,priority:“normal”,pickupDate:“2026-03-10”,dueDate:“2026-03-13”,deliveredDate:null,amount:3300,paid:false,notes:“First order.”,createdAt:“2026-03-10”,assignedTo:“Maria Santos”,agentId:“USR-002”,invoiceId:“INV-006”}
+]);
+lsSet(“nlcrm_invoices”,[
+{id:“INV-001”,invoiceNo:“NRTK-2026-001”,clientId:“CLT-001”,clientName:“Clark Marriott Hotel”,orderId:“ORD-001”,amount:7400,tax:0,discount:0,totalAmount:7400,status:“unpaid”,dueDate:“2026-03-17”,issuedDate:“2026-03-08”,paidDate:null,notes:“Net 7 terms”,agentId:“USR-002”,agentName:“Maria Santos”},
+{id:“INV-002”,invoiceNo:“NRTK-2026-002”,clientId:“CLT-002”,clientName:“St. Camillus Medical Center”,orderId:“ORD-002”,amount:5440,tax:0,discount:0,totalAmount:5440,status:“unpaid”,dueDate:“2026-03-17”,issuedDate:“2026-03-09”,paidDate:null,notes:””,agentId:“USR-002”,agentName:“Maria Santos”},
+{id:“INV-003”,invoiceNo:“NRTK-2026-003”,clientId:“CLT-003”,clientName:“Quest Hotel Clark”,orderId:“ORD-003”,amount:3120,tax:0,discount:0,totalAmount:3120,status:“unpaid”,dueDate:“2026-03-19”,issuedDate:“2026-03-10”,paidDate:null,notes:””,agentId:“USR-002”,agentName:“Maria Santos”},
+{id:“INV-004”,invoiceNo:“NRTK-2026-004”,clientId:“CLT-004”,clientName:“Sacred Heart Hospital”,orderId:“ORD-004”,amount:7360,tax:0,discount:0,totalAmount:7360,status:“paid”,dueDate:“2026-03-15”,issuedDate:“2026-03-06”,paidDate:“2026-03-08”,notes:””,agentId:“USR-002”,agentName:“Maria Santos”},
+{id:“INV-005”,invoiceNo:“NRTK-2026-005”,clientId:“CLT-001”,clientName:“Clark Marriott Hotel”,orderId:“ORD-005”,amount:1920,tax:0,discount:0,totalAmount:1920,status:“paid”,dueDate:“2026-03-14”,issuedDate:“2026-03-05”,paidDate:“2026-03-07”,notes:””,agentId:“USR-002”,agentName:“Maria Santos”},
+{id:“INV-006”,invoiceNo:“NRTK-2026-006”,clientId:“CLT-005”,clientName:“Royce Hotel”,orderId:“ORD-006”,amount:3300,tax:0,discount:0,totalAmount:3300,status:“unpaid”,dueDate:“2026-03-20”,issuedDate:“2026-03-10”,paidDate:null,notes:“New client”,agentId:“USR-002”,agentName:“Maria Santos”}
+]);
+lsSet(“nlcrm_staff”,[
+{id:“STF-001”,name:“Juan Dela Cruz”,role:“Laundry Operator”,phone:”+63 912 111 1111”,shift:“Morning”,status:“active”,ordersCompleted:45,joinDate:“2024-08-01”},
+{id:“STF-002”,name:“Maria Lopez”,role:“Quality Inspector”,phone:”+63 912 222 2222”,shift:“Morning”,status:“active”,ordersCompleted:62,joinDate:“2024-06-15”},
+{id:“STF-003”,name:“Pedro Reyes”,role:“Driver”,phone:”+63 912 333 3333”,shift:“Morning”,status:“active”,ordersCompleted:38,joinDate:“2024-09-01”},
+{id:“STF-004”,name:“Ana Pascual”,role:“Laundry Operator”,phone:”+63 912 444 4444”,shift:“Afternoon”,status:“active”,ordersCompleted:55,joinDate:“2024-07-20”}
+]);
+var inv=CHEMS.map(function(name,i){
+var st=[18,12,25,8,10,5,6,15,7,3,9,2];
+var mn=[10,10,15,8,8,5,5,10,5,5,8,3];
+var unit=(CUNIT[name]||“L”);
+return{id:“CHM-”+(i+1),name:name,unit:unit,pricePerUnit:CPRICE[name]||100,stock:st[i]||10,minStock:mn[i]||5,lastRestocked:“2026-03-01”};
+});
+lsSet(“nlcrm_inventory”,inv);
+lsSet(“nlcrm_deliveries”,[
+{id:“DEL-001”,clientName:“St. Camillus Medical Center”,address:“Don Juico Ave, Malabanias”,scheduledDate:“2026-03-10”,scheduledTime:“09:00”,driver:“Pedro Reyes”,type:“delivery”,status:“scheduled”,notes:“Urgent ward delivery”},
+{id:“DEL-002”,clientName:“Clark Marriott Hotel”,address:“Mimosa Drive, Clark”,scheduledDate:“2026-03-10”,scheduledTime:“14:00”,driver:“Pedro Reyes”,type:“delivery”,status:“scheduled”,notes:””},
+{id:“DEL-003”,clientName:“Quest Hotel Clark”,address:“M.A. Roxas Highway”,scheduledDate:“2026-03-10”,scheduledTime:“10:00”,driver:“Pedro Reyes”,type:“pickup”,status:“in_transit”,notes:””}
+]);
+lsSet(“nlcrm_inv_counter”,7);
+}
+
+// === ATOMS ===
+function stl(o){return o;}
+function Crd(p){return div({className:“ios-group”,style:Object.assign({},p.style||{})},p.children);}
+function Badge(p){var c=p.color||MUT,bg=p.bg||(c+“18”);return sp({className:“ios-chip”,style:{background:bg,color:c}},p.children);}
+function Avatar(p){
+var initials=(p.name||”?”).split(” “).map(function(w){return w[0]||””;}).slice(0,2).join(””).toUpperCase();
+var cols=[BLU,GRN,PUR,ORG,TEA,PNK];
+var col=cols[(p.name||“X”).charCodeAt(0)%cols.length];
+var sz=p.size||36;
+return div({style:{width:sz,height:sz,borderRadius:“50%”,background:col+“22”,border:“1.5px solid “+col+“40”,display:“flex”,alignItems:“center”,justifyContent:“center”,color:col,fontSize:sz*0.36,fontWeight:800,flexShrink:0,fontFamily:MN}},initials);
+}
+function SecT(p){return div({className:“ios-sh”},p.children);}
+function StatCard(p){
+return div({className:“ios-group pressable”,style:Object.assign({padding:“15px 16px”,flex:1},p.style||{})},
+div({style:{fontSize:12,fontWeight:500,color:MUT,marginBottom:5,letterSpacing:”-0.01em”}},p.label),
+div({style:{fontSize:p.big?26:21,fontWeight:700,color:p.color||TXT,letterSpacing:”-0.04em”,fontFamily:MN,lineHeight:1}},p.value),
+p.sub?div({style:{fontSize:12,color:MUT,marginTop:5,letterSpacing:”-0.01em”}},p.sub):null
+);
+}
+function Toast(p){
+if(!p.msg)return null;
+var bg=p.type===“error”?RED:p.type===“warning”?ORG:GRN;
+return div({className:“no-print”,style:{position:“fixed”,bottom:104,left:“50%”,transform:“translateX(-50%)”,background:“rgba(44,44,46,0.96)”,color:”#fff”,borderRadius:14,padding:“13px 22px”,fontSize:15,fontWeight:500,fontFamily:SS,boxShadow:“0 8px 32px rgba(0,0,0,0.32)”,zIndex:9999,whiteSpace:“nowrap”,animation:“toastIn 0.22s ease both”}},
+(p.type===“error”?“⚠️ “:p.type===“warning”?“🟡 “:“✅ “)+p.msg
+);
+}
+function ModalSheet(p){
+if(!p.open)return null;
+return div({className:“no-print”,style:{position:“fixed”,inset:0,zIndex:500,display:“flex”,flexDirection:“column”,justifyContent:“flex-end”}},
+div({onClick:p.onClose,className:“sheet-back”,style:{position:“absolute”,inset:0}}),
+div({style:{position:“relative”,background:”#F2F2F7”,borderRadius:“22px 22px 0 0”,maxHeight:“93vh”,overflowY:“auto”,paddingBottom:“env(safe-area-inset-bottom,28px)”}},
+div({style:{display:“flex”,justifyContent:“center”,padding:“12px 0 4px”,background:CRD,borderRadius:“22px 22px 0 0”}}),
+div({style:{width:36,height:4,borderRadius:2,background:”#C7C7CC”,position:“absolute”,top:8,left:“50%”,transform:“translateX(-50%)”}}),
+div({style:{padding:“8px 18px 14px”,display:“flex”,alignItems:“center”,justifyContent:“space-between”,position:“sticky”,top:0,background:CRD,zIndex:10,borderBottom:“0.5px solid rgba(60,60,67,0.18)”}}),
+div({style:{fontSize:17,fontWeight:600,color:TXT,letterSpacing:”-0.02em”}},p.title),
+btn({onClick:p.onClose,style:{background:BG,border:“none”,borderRadius:20,width:28,height:28,display:“flex”,alignItems:“center”,justifyContent:“center”,cursor:“pointer”,color:MUT,fontSize:20,lineHeight:1}},“x”),
+div({style:{padding:“16px 18px”}},p.children)
+)
+);
+}
+function FRow(p){return div({style:{marginBottom:14}},div({style:{fontSize:13,fontWeight:500,color:MUT,marginBottom:6,letterSpacing:”-0.01em”}},p.label),p.children);}
+function FInp(p){
+return inp({value:p.value,onChange:function(ev){p.onChange(ev.target.value);},placeholder:p.placeholder||””,type:p.type||“text”,className:“ios-inp”,style:{border:p.error?“2px solid “+RED:“none”}});
+}
+function FSel(p){
+var args=[“select”,{value:p.value,onChange:function(ev){p.onChange(ev.target.value);},className:“ios-inp”,style:{cursor:“pointer”}}];
+var kids=p.children;
+if(Array.isArray(kids)){for(var i=0;i<kids.length;i++)args.push(kids[i]);}
+else args.push(kids);
+return R.createElement.apply(R,args);
+}
+function FTxt(p){return C(“textarea”,{value:p.value,onChange:function(ev){p.onChange(ev.target.value);},placeholder:p.placeholder||””,rows:p.rows||3,className:“ios-inp”,style:{resize:“vertical”,lineHeight:1.6}});}
+function PrimaryBtn(p){
+return btn({onClick:p.onClick,disabled:p.disabled,className:“ios-btn-primary no-print”,style:{background:p.disabled?”#C7C7CC”:p.col||BLU}},p.children);
+}
+function SecBtn(p){
+return btn({onClick:p.onClick,className:“no-print”,style:{width:“100%”,padding:“15px”,borderRadius:14,border:“none”,background:(p.col||MUT)+“18”,color:p.col||MUT,fontSize:17,fontWeight:500,cursor:“pointer”,fontFamily:SS,marginTop:8,letterSpacing:”-0.01em”}},p.children);
+}
+function EmptyState(p){
+return div({style:{textAlign:“center”,padding:“60px 24px”}},
+div({style:{fontSize:44,marginBottom:14,opacity:0.35}},p.icon||”?”),
+div({style:{color:SUB,fontSize:16,fontWeight:700,marginBottom:6}},p.title),
+div({style:{color:MUT,fontSize:13,lineHeight:1.6,marginBottom:20}},p.desc),
+p.action?btn({onClick:p.onAction,style:{background:BDL,border:“1px solid “+BLU+“30”,color:BLU,borderRadius:12,padding:“10px 22px”,fontSize:14,fontWeight:700,cursor:“pointer”,fontFamily:SS}},p.action):null
+);
+}
+function MiniBar(p){
+var data=p.data||[];
+var max=Math.max.apply(null,data.map(function(d){return d.v;}))||1;
+var h=p.h||52;
+return div({style:{display:“flex”,alignItems:“flex-end”,gap:4,height:h}},
+data.map(function(d,i){
+var pct=Math.max(6,(d.v/max)*100);
+var isLast=i===data.length-1;
+return div({key:i,style:{flex:1,display:“flex”,flexDirection:“column”,alignItems:“center”,gap:3}},
+div({style:{width:“100%”,height:(h-16),display:“flex”,alignItems:“flex-end”}},
+div({style:{width:“100%”,height:pct+”%”,background:isLast?BLU:BLU+“40”,borderRadius:“4px 4px 0 0”}})
+),
+div({style:{fontSize:8,color:MUT,fontFamily:MN}},d.l)
+);
+})
+);
+}
+function NLogo(p){
+var sz=p.size||36,col=p.color||BLU;
+return C(“svg”,{width:sz,height:sz,viewBox:“0 0 100 100”,fill:“none”},
+C(“rect”,{width:100,height:100,rx:22,fill:col,opacity:0.12}),
+C(“circle”,{cx:50,cy:42,r:18,fill:“none”,stroke:col,strokeWidth:8}),
+C(“path”,{d:“M50 42 L50 15”,stroke:col,strokeWidth:8,strokeLinecap:“round”}),
+C(“circle”,{cx:50,cy:12,r:6,fill:col}),
+C(“path”,{d:“M30 72 Q50 88 70 72”,stroke:col,strokeWidth:7,strokeLinecap:“round”,fill:“none”}),
+C(“line”,{x1:38,y1:78,x2:38,y2:86,stroke:col,strokeWidth:5,strokeLinecap:“round”}),
+C(“line”,{x1:62,y1:78,x2:62,y2:86,stroke:col,strokeWidth:5,strokeLinecap:“round”})
+);
+}
+
+// === AUTH SCREEN ===
+function AuthScreen(p){
+var s=useState(“login”),mode=s[0],setMode=s[1];
+var s2=useState(””),le=s2[0],setLe=s2[1];
+var s3=useState(””),lp=s3[0],setLp=s3[1];
+var s4=useState(””),lerr=s4[0],setLerr=s4[1];
+var s5=useState(false),shake=s5[0],setShake=s5[1];
+var s6=useState(””),rn=s6[0],setRn=s6[1];
+var s7=useState(””),re=s7[0],setRe=s7[1];
+var s8=useState(””),rp=s8[0],setRp=s8[1];
+var s9=useState(””),rp2=s9[0],setRp2=s9[1];
+var s10=useState(“agent”),rr=s10[0],setRr=s10[1];
+var s11=useState(””),rc=s11[0],setRc=s11[1];
+var s12=useState(””),rerr=s12[0],setRerr=s12[1];
+
+function doLogin(){
+setLerr(””);
+var users=lsGet(“nlcrm_users”)||[];
+var u=users.find(function(x){return x.email.toLowerCase()===le.toLowerCase()&&x.password===hashPw(lp);});
+if(!u){setLerr(“Invalid email or password”);setShake(true);setTimeout(function(){setShake(false);},400);return;}
+if(!u.active){setLerr(“Account inactive. Contact admin.”);return;}
+lsSet(“nlcrm_session”,{userId:u.id,name:u.name,role:u.role,company:u.company,email:u.email});
+p.onLogin(u);
+}
+function doRegister(){
+setRerr(””);
+if(!rn.trim()||!re.trim()||!rp){setRerr(“All fields required”);return;}
+if(!re.includes(”@”)){setRerr(“Invalid email”);return;}
+if(rp.length<6){setRerr(“Password min 6 chars”);return;}
+if(rp!==rp2){setRerr(“Passwords do not match”);return;}
+var users=lsGet(“nlcrm_users”)||[];
+if(users.find(function(x){return x.email.toLowerCase()===re.toLowerCase();})){setRerr(“Email already registered”);return;}
+var nu={id:mkId(“USR”),name:rn.trim(),email:re.toLowerCase().trim(),password:hashPw(rp),role:rr,company:rc.trim()||“Global Nortkem Marketing Inc.”,phone:””,active:(rr===“agent”||rr===“staff”),pendingApproval:(rr===“admin”||rr===“operator”),createdAt:todayISO()};
+users.push(nu);
+lsSet(“nlcrm_users”,users);
+if(nu.pendingApproval){setMode(“login”);setLerr(“Account created - pending admin approval.”);}
+else{lsSet(“nlcrm_session”,{userId:nu.id,name:nu.name,role:nu.role,company:nu.company,email:nu.email});p.onLogin(nu);}
+}
+
+var tabStyle=function(active){return{flex:1,padding:“8px”,borderRadius:8,border:“none”,background:active?CRD:“transparent”,color:active?TXT:MUT,fontSize:13,fontWeight:active?600:400,cursor:“pointer”,fontFamily:SS,boxShadow:active?“0 1px 3px rgba(0,0,0,0.14)”:“none”};};
+
+return div({style:{minHeight:“100vh”,background:“linear-gradient(165deg,#0f0c29 0%,#302b63 40%,#24243e 100%)”,display:“flex”,flexDirection:“column”,alignItems:“center”,justifyContent:“center”,padding:“28px 20px”,fontFamily:SS}},
+div({style:{marginBottom:28,textAlign:“center”}},
+div({style:{width:80,height:80,borderRadius:20,background:“rgba(255,255,255,0.12)”,display:“flex”,alignItems:“center”,justifyContent:“center”,margin:“0 auto 14px”,border:“1px solid rgba(255,255,255,0.2)”}},
+C(NLogo,{size:50,color:”#ffffff”})
+),
+div({style:{fontSize:28,fontWeight:700,color:”#fff”,letterSpacing:”-0.04em”}},“NortLaundry CRM”),
+div({style:{fontSize:14,color:“rgba(255,255,255,0.55)”,marginTop:4,letterSpacing:”-0.01em”}},“Global Nortkem Marketing Inc.”)
+),
+div({className:shake?“shake”:””,style:{background:CRD,borderRadius:22,padding:“24px 20px”,width:“100%”,maxWidth:400,boxShadow:“0 32px 80px rgba(0,0,0,0.45)”}},
+div({className:“ios-seg”,style:{marginBottom:24}},
+btn({onClick:function(){setMode(“login”);setLerr(””);setRerr(””);},className:“ios-seg-btn “+(mode===“login”?“active”:””)},“Sign In”),
+btn({onClick:function(){setMode(“register”);setLerr(””);setRerr(””);},className:“ios-seg-btn “+(mode===“register”?“active”:””)},“Register”)
+),
+mode===“login”?div(null,
+C(FRow,{label:“Email”},C(FInp,{value:le,onChange:setLe,type:“email”,placeholder:“your@email.com”})),
+C(FRow,{label:“Password”},C(FInp,{value:lp,onChange:setLp,type:“password”,placeholder:“Password”})),
+lerr?div({style:{background:RLT,borderRadius:12,padding:“12px 14px”,fontSize:14,color:RED,marginBottom:12,fontWeight:500}},lerr):null,
+C(PrimaryBtn,{onClick:doLogin},“Sign In”),
+div({style:{marginTop:18,background:BG,borderRadius:12,padding:“14px”}},
+div({style:{fontSize:11,fontWeight:600,color:MUT,textAlign:“center”,marginBottom:9,textTransform:“uppercase”,letterSpacing:“0.06em”}},“Demo Accounts”),
+div({style:{fontSize:12,color:MUT,fontFamily:MN,textAlign:“center”,lineHeight:1.9}},
+“admin@nortkem.ph / nortkem123”,R.createElement(“br”,null),
+“agent@nortkem.ph / agent123”,R.createElement(“br”,null),
+“operator@hotel.ph / hotel123”
+)
+)
+):div(null,
+C(FRow,{label:“Full Name *”},C(FInp,{value:rn,onChange:setRn,placeholder:“Your name”})),
+C(FRow,{label:“Email *”},C(FInp,{value:re,onChange:setRe,type:“email”,placeholder:“your@email.com”})),
+C(FRow,{label:“Company”},C(FInp,{value:rc,onChange:setRc,placeholder:“Company name”})),
+C(FRow,{label:“Role”},
+C(FSel,{value:rr,onChange:setRr},
+C(“option”,{value:“agent”},“Agent (auto-approved)”),
+C(“option”,{value:“staff”},“Staff (auto-approved)”),
+C(“option”,{value:“operator”},“Operator (needs approval)”),
+C(“option”,{value:“admin”},“Admin (needs approval)”)
+)
+),
+C(FRow,{label:“Password *”},C(FInp,{value:rp,onChange:setRp,type:“password”,placeholder:“Min 6 characters”})),
+C(FRow,{label:“Confirm Password *”},C(FInp,{value:rp2,onChange:setRp2,type:“password”,placeholder:“Repeat password”})),
+rerr?div({style:{background:RLT,borderRadius:12,padding:“12px 14px”,fontSize:14,color:RED,marginBottom:12,fontWeight:500}},rerr):null,
+C(PrimaryBtn,{onClick:doRegister},“Create Account”),
+div({style:{marginTop:14,textAlign:“center”,fontSize:13,color:MUT,lineHeight:1.5}},“🔒 Admin & Operator accounts require approval”)
+)
+)
+);
+}
+
+// === INVOICE PRINT ===
+function InvoicePrint(p){
+var inv=p.invoice,order=p.order,client=p.client;
+if(!inv)return null;
+var isPaid=inv.status===“paid”;
+var total=inv.totalAmount||inv.amount||0;
+function doPrint(){window.print();}
+var ps=”@media print{body *{visibility:hidden!important}.print-area,.print-area *{visibility:visible!important}.print-area{position:fixed!important;top:0!important;left:0!important;width:100%!important;background:#fff!important;padding:32px!important;z-index:99999!important}}”;
+var infoRows=[[“Invoice No.”,inv.invoiceNo||inv.id],[“Date Issued”,fmtDate(inv.issuedDate)],[“Due Date”,fmtDate(inv.dueDate)||”–”],[“Agent”,inv.agentName||”–”]];
+var totRows=[[“Subtotal”,fmtPeso(inv.amount||0)],[“Discount”,inv.discount>0?”(”+fmtPeso(inv.discount)+”)”:”–”],[“Tax / VAT”,inv.tax>0?fmtPeso(inv.tax):”–”]];
+return div({style:{position:“fixed”,inset:0,zIndex:800,background:“rgba(0,0,0,0.7)”,display:“flex”,flexDirection:“column”,alignItems:“center”,justifyContent:“flex-start”,overflowY:“auto”,padding:“24px 12px”}},
+C(“style”,null,ps),
+div({className:“no-print”,style:{width:“100%”,maxWidth:680,marginBottom:16,display:“flex”,gap:10,justifyContent:“flex-end”}},
+btn({onClick:doPrint,style:{background:BLU,color:”#fff”,border:“none”,borderRadius:12,padding:“12px 24px”,fontSize:14,fontWeight:700,cursor:“pointer”,fontFamily:SS}},“Print Invoice”),
+btn({onClick:p.onClose,style:{background:CRD,color:TXT,border:“1px solid “+BDR,borderRadius:12,padding:“12px 24px”,fontSize:14,fontWeight:700,cursor:“pointer”,fontFamily:SS}},“Close”)
+),
+div({className:“print-area”,style:{background:”#fff”,width:“100%”,maxWidth:680,borderRadius:16,overflow:“hidden”,boxShadow:“0 8px 40px rgba(0,0,0,0.25)”,fontFamily:”‘DM Sans’,Arial,sans-serif”}},
+div({style:{background:“linear-gradient(135deg,#0044CC 0%,#007AFF 100%)”,padding:“28px 32px”,color:”#fff”}},
+div({style:{display:“flex”,justifyContent:“space-between”,alignItems:“flex-start”}},
+div({style:{display:“flex”,alignItems:“center”,gap:14}},
+div({style:{width:52,height:52,background:“rgba(255,255,255,0.15)”,borderRadius:14,display:“flex”,alignItems:“center”,justifyContent:“center”}},
+C(NLogo,{size:38,color:”#ffffff”})
+),
+div(null,
+div({style:{fontSize:22,fontWeight:700}},“NORTKEM”),
+div({style:{fontSize:11,opacity:0.8,marginTop:2}},“Global Nortkem Marketing Inc.”),
+div({style:{fontSize:10,opacity:0.7,marginTop:1}},“Angeles City, Pampanga, Philippines”)
+)
+),
+div({style:{textAlign:“right”}},
+div({style:{fontSize:22,fontWeight:700,letterSpacing:“0.05em”}},“INVOICE”),
+div({style:{fontSize:14,opacity:0.9,marginTop:4,fontFamily:MN}},inv.invoiceNo||inv.id),
+div({style:{marginTop:8,display:“inline-block”,background:isPaid?“rgba(52,199,89,0.25)”:“rgba(255,149,0,0.25)”,border:“1.5px solid “+(isPaid?“rgba(52,199,89,0.6)”:“rgba(255,149,0,0.6)”),borderRadius:20,padding:“4px 14px”,fontSize:12,fontWeight:700,color:isPaid?”#90FFB0”:”#FFD580”}},isPaid?“PAID”:“UNPAID”)
+)
+)
+),
+div({style:{padding:“24px 32px”}},
+div({style:{display:“grid”,gridTemplateColumns:“1fr 1fr”,gap:20,marginBottom:24}},
+div(null,
+div({style:{fontSize:10,fontWeight:700,color:MUT,textTransform:“uppercase”,letterSpacing:“0.08em”,marginBottom:8}},“Bill To”),
+div({style:{fontSize:15,fontWeight:800,color:TXT,marginBottom:3}},inv.clientName),
+client?div({style:{fontSize:12,color:SUB,lineHeight:1.6}},client.address+”, “+client.city):null
+),
+div(null,
+div({style:{fontSize:10,fontWeight:700,color:MUT,textTransform:“uppercase”,letterSpacing:“0.08em”,marginBottom:8}},“Invoice Details”),
+infoRows.map(function(r){
+return div({key:r[0],style:{display:“flex”,justifyContent:“space-between”,fontSize:12,marginBottom:4}},
+sp({style:{color:MUT}},r[0]),
+sp({style:{color:TXT,fontWeight:600}},r[1])
+);
+})
+)
+),
+div({style:{border:“1px solid “+BDR,borderRadius:12,overflow:“hidden”,marginBottom:20}},
+div({style:{background:BG,padding:“10px 16px”,display:“grid”,gridTemplateColumns:“2fr 1fr 1fr 1fr”,gap:8}},
+[“Description”,“Service”,“Weight”,“Amount”].map(function(h){return div({key:h,style:{fontSize:11,fontWeight:700,color:MUT,textTransform:“uppercase”}},h);})
+),
+div({style:{padding:“14px 16px”,borderTop:“1px solid “+BDR,display:“grid”,gridTemplateColumns:“2fr 1fr 1fr 1fr”,gap:8,alignItems:“center”}},
+div(null,
+div({style:{fontSize:14,fontWeight:700,color:TXT}},“Laundry Services”),
+order?div({style:{fontSize:11,color:MUT,marginTop:2}},“Order “+order.id+” - “+fmtDate(order.createdAt)):null
+),
+div({style:{fontSize:13,color:SUB}},order?order.service:”–”),
+div({style:{fontSize:13,color:SUB}},order?(order.weightKg+“kg”):”–”),
+div({style:{fontSize:14,fontWeight:700,color:TXT,fontFamily:MN}},fmtPeso(inv.amount||0))
+)
+),
+div({style:{display:“flex”,justifyContent:“flex-end”,marginBottom:24}},
+div({style:{width:260}},
+totRows.map(function(r,i){
+return div({key:r[0],style:{display:“flex”,justifyContent:“space-between”,padding:“5px 0”,borderBottom:“1px solid “+BDR,fontSize:13}},
+sp({style:{color:MUT}},r[0]),
+sp({style:{color:TXT,fontWeight:600}},r[1])
+);
+}),
+div({style:{display:“flex”,justifyContent:“space-between”,padding:“12px 0 0”,fontSize:18,fontWeight:700}},
+sp({style:{color:TXT}},“TOTAL”),
+sp({style:{color:BLU,fontFamily:MN}},fmtPeso(total))
+)
+)
+),
+isPaid?div({style:{background:GLT,border:“1.5px solid “+GRN+“40”,borderRadius:12,padding:“12px 16px”,marginBottom:20,display:“flex”,gap:10,alignItems:“center”}},
+div(null,
+div({style:{fontSize:13,fontWeight:700,color:GRN}},“Payment Received”),
+div({style:{fontSize:12,color:MUT}},“Paid on “+fmtDate(inv.paidDate))
+)
+):null,
+div({style:{borderTop:“1.5px dashed “+BDR,paddingTop:16,display:“grid”,gridTemplateColumns:“1fr 1fr”,gap:16}},
+div(null,
+div({style:{fontSize:10,color:MUT,marginBottom:6,fontWeight:700,textTransform:“uppercase”}},“Payment Terms”),
+div({style:{fontSize:12,color:SUB,lineHeight:1.6}},“Please pay within the due date. Bank transfer or cash accepted.”)
+),
+div({style:{textAlign:“right”}},
+div({style:{fontSize:10,color:MUT,marginBottom:24,fontWeight:700,textTransform:“uppercase”}},“Authorized Signature”),
+div({style:{borderBottom:“1px solid “+TXT,marginBottom:4,height:40}}),
+div({style:{fontSize:11,color:MUT}},“NORTKEM Representative”),
+div({style:{fontSize:11,color:MUT,marginTop:2}},inv.agentName||“Agent”)
+)
+),
+div({style:{marginTop:20,textAlign:“center”,borderTop:“1px solid “+BDR,paddingTop:14}},
+div({style:{fontSize:12,color:MUT}},“Global Nortkem Marketing Inc. - Angeles City, Pampanga - nortkem.ph”),
+div({style:{fontSize:11,color:MUT,marginTop:3}},“contact@nortkem.ph - +63 45 300 0001”)
+)
+)
+)
+);
+}
+
+// === SENSITIVE AUTH MODAL ===
+function SensitiveAuthModal(p){
+var cu=p.currentUser;
+var isElev=cu.role===“admin”||cu.role===“operator”;
+var s1=useState(isElev?cu.email:””),em=s1[0],setEm=s1[1];
+var s2=useState(””),pw=s2[0],setPw=s2[1];
+var s3=useState(””),err=s3[0],setErr=s3[1];
+var s4=useState(false),shk=s4[0],setShk=s4[1];
+function doAuth(){
+setErr(””);
+var users=lsGet(“nlcrm_users”)||[];
+var u=users.find(function(x){return x.email.toLowerCase()===em.toLowerCase()&&x.password===hashPw(pw);});
+if(!u){setErr(“Incorrect credentials”);setShk(true);setTimeout(function(){setShk(false);},400);return;}
+if(u.role!==“admin”&&u.role!==“operator”){setErr(“Only Operator or Admin can authorize this”);return;}
+if(!u.active){setErr(“Account is inactive”);return;}
+p.onSuccess(u);setPw(””);setErr(””);
+}
+return div({style:{position:“fixed”,inset:0,zIndex:900,display:“flex”,alignItems:“center”,justifyContent:“center”,padding:20,background:“rgba(0,0,0,0.65)”}},
+div({className:shk?“shake”:””,style:{background:CRD,borderRadius:22,padding:“26px 22px”,width:“100%”,maxWidth:360,boxShadow:“0 20px 60px rgba(0,0,0,0.35)”}},
+div({style:{textAlign:“center”,marginBottom:18}},
+div({style:{fontSize:38,marginBottom:8}},“🔒”),
+div({style:{fontSize:17,fontWeight:700,color:TXT,marginBottom:4}},“Authorization Required”),
+div({style:{fontSize:12,color:MUT,lineHeight:1.6}},isElev?“Re-enter your password to edit sensitive data.”:“Have an Operator or Admin enter their credentials.”)
+),
+div({style:{background:OLT,border:“1px solid “+ORG+“40”,borderRadius:11,padding:“10px 13px”,marginBottom:16,fontSize:12,color:ORG,fontWeight:600}},“Sensitive field: “+sp({style:{color:TXT}},p.fieldLabel)),
+!isElev?C(FRow,{label:“Operator / Admin Email”},C(FInp,{value:em,onChange:setEm,type:“email”,placeholder:“operator@company.ph”})):
+div({style:{background:BDL,borderRadius:11,padding:“9px 13px”,marginBottom:12,fontSize:12,color:BLU}},“Authorizing as: “+cu.name+” (”+ROLES[cu.role]+”)”),
+C(FRow,{label:isElev?“Your Password”:“Operator Password”},C(FInp,{value:pw,onChange:setPw,type:“password”,placeholder:“Enter password”})),
+err?div({style:{background:RLT,border:“1px solid “+RED+“30”,borderRadius:10,padding:“9px 13px”,fontSize:12,color:RED,marginBottom:8}},err):null,
+C(PrimaryBtn,{onClick:doAuth,col:ORG,col2:”#CC7700”},“Authorize & Unlock”),
+C(SecBtn,{onClick:p.onCancel},“Cancel”)
+)
+);
+}
+
+// === CLIENT EDIT FORM ===
+function ClientEditForm(p){
+var c=p.client;
+var cu=p.currentUser;
+var s1=useState({name:c.name||””,contact:c.contact||””,phone:c.phone||””,email:c.email||””,address:c.address||””,city:c.city||””,notes:c.notes||””,preferences:c.preferences||””}),basic=s1[0],setBasic=s1[1];
+var s2=useState({type:c.type||“Hotel”,outstandingBalance:c.outstandingBalance||0,totalSpent:c.totalSpent||0,agentId:c.agentId||””,creditLimit:c.creditLimit||0,paymentTerms:c.paymentTerms||“Net 30”}),sens=s2[0],setSens=s2[1];
+var s3=useState({}),unlocked=s3[0],setUnlocked=s3[1];
+var s4=useState(null),authPend=s4[0],setAuthPend=s4[1];
+function setB(k){return function(v){setBasic(function(prev){var n=Object.assign({},prev);n[k]=v;return n;});};}
+function setS(k){return function(v){setSens(function(prev){var n=Object.assign({},prev);n[k]=v;return n;});};}
+function reqUnlock(field,label){setAuthPend({field:field,label:label});}
+function onAuth(authorizer){if(authPend){setUnlocked(function(prev){var n=Object.assign({},prev);n[authPend.field]=true;return n;});p.showToast(“Unlocked by “+authorizer.name);}setAuthPend(null);}
+function doSave(){
+if(!basic.name.trim()){p.showToast(“Client name required”,“error”);return;}
+var updated=Object.assign({},c,basic,sens,{outstandingBalance:parseFloat(sens.outstandingBalance)||0,totalSpent:parseFloat(sens.totalSpent)||0,creditLimit:parseFloat(sens.creditLimit)||0});
+p.onSave(updated);
+}
+function SensField(fp){
+var isUnlocked=!!unlocked[fp.field];
+return C(FRow,{label:fp.label+(isUnlocked?” [UNLOCKED]”:” [LOCKED]”)},
+isUnlocked?fp.input:
+btn({onClick:function(){reqUnlock(fp.field,fp.label);},style:{width:“100%”,background:OLT,border:“1.5px dashed “+ORG+“60”,borderRadius:12,padding:“11px 14px”,color:ORG,fontSize:13,fontWeight:700,cursor:“pointer”,fontFamily:SS,textAlign:“left”}},“🔒 Tap to unlock — requires Operator/Admin auth”)
+);
+}
+return div(null,
+authPend?C(SensitiveAuthModal,{currentUser:cu,fieldLabel:authPend.label,onSuccess:onAuth,onCancel:function(){setAuthPend(null);}}):null,
+div({style:{background:BDL,borderRadius:12,padding:“11px 13px”,marginBottom:16,fontSize:12,color:BLU,lineHeight:1.6}},
+“Basic info can be edited freely. Fields marked [LOCKED] require Operator/Admin authorization.”
+),
+C(SecT,null,“Basic Information”),
+C(FRow,{label:“Business Name *”},C(FInp,{value:basic.name,onChange:setB(“name”),placeholder:“Client name”})),
+C(FRow,{label:“Contact Person”},C(FInp,{value:basic.contact,onChange:setB(“contact”),placeholder:“Contact name”})),
+div({style:{display:“grid”,gridTemplateColumns:“1fr 1fr”,gap:10}},
+C(FRow,{label:“Phone”},C(FInp,{value:basic.phone,onChange:setB(“phone”),placeholder:”+63…”})),
+C(FRow,{label:“Email”},C(FInp,{value:basic.email,onChange:setB(“email”),type:“email”,placeholder:“email@…”}))
+),
+C(FRow,{label:“Address”},C(FInp,{value:basic.address,onChange:setB(“address”),placeholder:“Street address”})),
+C(FRow,{label:“City”},C(FInp,{value:basic.city,onChange:setB(“city”),placeholder:“City”})),
+C(FRow,{label:“Notes”},C(FTxt,{value:basic.notes,onChange:setB(“notes”),rows:2,placeholder:“Special instructions…”})),
+C(FRow,{label:“Wash Preferences”},C(FTxt,{value:basic.preferences,onChange:setB(“preferences”),rows:2,placeholder:“Detergent, temperature, fold style…”})),
+div({style:{height:1,background:BDR,margin:“16px 0”}}),
+C(SecT,null,“Sensitive Information (Authorization Required)”),
+C(SensField,{field:“type”,label:“Client Type”,input:C(FSel,{value:sens.type,onChange:setS(“type”)},CTYPES.map(function(t){return C(“option”,{key:t,value:t},t);}))}),
+C(SensField,{field:“outstandingBalance”,label:“Outstanding Balance (PHP)”,input:C(FInp,{value:sens.outstandingBalance,onChange:setS(“outstandingBalance”),type:“number”,placeholder:“0.00”})}),
+C(SensField,{field:“totalSpent”,label:“Total Revenue (PHP)”,input:C(FInp,{value:sens.totalSpent,onChange:setS(“totalSpent”),type:“number”,placeholder:“0.00”})}),
+C(SensField,{field:“creditLimit”,label:“Credit Limit (PHP)”,input:C(FInp,{value:sens.creditLimit,onChange:setS(“creditLimit”),type:“number”,placeholder:“0.00”})}),
+C(SensField,{field:“paymentTerms”,label:“Payment Terms”,input:C(FSel,{value:sens.paymentTerms,onChange:setS(“paymentTerms”)},[“COD”,“Net 7”,“Net 15”,“Net 30”,“Net 45”,“Net 60”,“Prepaid”,“Monthly Billing”].map(function(t){return C(“option”,{key:t,value:t},t);}))}),
+div({style:{height:1,background:BDR,margin:“16px 0”}}),
+C(PrimaryBtn,{onClick:doSave},“Save Changes”),
+C(SecBtn,{onClick:p.onCancel},“Cancel”)
+);
+}
+
+// === CLIENT HISTORY + PROFILE ===
+function ClientHistory(p){
+var c=p.client;
+var ords=p.orders.filter(function(o){return o.clientId===c.id;});
+var invs=p.invoices.filter(function(i){return i.clientId===c.id;});
+var s1=useState(“all”),filter=s1[0],setFilter=s1[1];
+var s2=useState(null),showInv=s2[0],setShowInv=s2[1];
+var totalPaid=invs.filter(function(i){return i.status===“paid”;}).reduce(function(s,i){return s+i.totalAmount;},0);
+var totalUnpaid=invs.filter(function(i){return i.status===“unpaid”;}).reduce(function(s,i){return s+i.totalAmount;},0);
+var filteredOrds=ords.filter(function(o){return filter===“all”||o.status===filter;});
+var selInv=showInv?invs.find(function(i){return i.orderId===showInv.id;}):null;
+return div(null,
+showInv&&selInv?C(InvoicePrint,{invoice:selInv,order:showInv,client:c,onClose:function(){setShowInv(null);}}):null,
+div({style:{display:“grid”,gridTemplateColumns:“1fr 1fr 1fr”,gap:8,marginBottom:18}},
+div({style:{background:BDL,borderRadius:12,padding:“11px”,textAlign:“center”}},div({style:{fontSize:16,fontWeight:700,color:BLU,fontFamily:MN}},ords.length),div({style:{fontSize:10,color:MUT}},“Orders”)),
+div({style:{background:GLT,borderRadius:12,padding:“11px”,textAlign:“center”}},div({style:{fontSize:13,fontWeight:700,color:GRN,fontFamily:MN}},fmtPeso(totalPaid)),div({style:{fontSize:10,color:MUT}},“Paid”)),
+div({style:{background:OLT,borderRadius:12,padding:“11px”,textAlign:“center”}},div({style:{fontSize:13,fontWeight:700,color:ORG,fontFamily:MN}},fmtPeso(totalUnpaid)),div({style:{fontSize:10,color:MUT}},“Outstanding”))
+),
+c.notes?div({style:{background:BDL,borderRadius:12,padding:“12px 14px”,marginBottom:12,fontSize:13,color:SUB,lineHeight:1.5}},sp({style:{fontWeight:700,color:BLU}},“Notes: “),c.notes):null,
+c.preferences?div({style:{background:PLT,borderRadius:12,padding:“12px 14px”,marginBottom:12,fontSize:13,color:SUB,lineHeight:1.5}},sp({style:{fontWeight:700,color:PUR}},“Preferences: “),c.preferences):null,
+C(SecT,null,“Transaction History”),
+div({style:{display:“flex”,gap:6,overflowX:“auto”,marginBottom:12,paddingBottom:2}},
+[[“all”,“All”],[“received”,“Received”],[“processing”,“Processing”],[“ready”,“Ready”],[“delivered”,“Delivered”]].map(function(f){
+var active=filter===f[0];
+return btn({key:f[0],onClick:function(){setFilter(f[0]);},style:{background:active?BLU:CRD,border:“1.5px solid “+(active?BLU:BDR),borderRadius:20,padding:“5px 12px”,color:active?”#fff”:MUT,fontSize:11,fontWeight:700,cursor:“pointer”,fontFamily:SS,whiteSpace:“nowrap”,flexShrink:0}},f[1]);
+})
+),
+filteredOrds.length===0?C(EmptyState,{icon:”?”,title:“No transactions”,desc:“No orders match this filter.”}):null,
+div({style:{display:“flex”,flexDirection:“column”,gap:8}},
+filteredOrds.sort(function(a,b){return b.createdAt.localeCompare(a.createdAt);}).map(function(o){
+var st=ORDS[o.status];
+var inv=invs.find(function(i){return i.orderId===o.id;});
+var overdue=o.dueDate&&o.dueDate<todayISO()&&o.status!==“delivered”&&o.status!==“cancelled”;
+return div({key:o.id,style:{background:CRD,borderRadius:14,padding:“13px”,boxShadow:SHD,borderLeft:“3px solid “+(overdue?RED:st.color)}},
+div({style:{display:“flex”,justifyContent:“space-between”,alignItems:“flex-start”,marginBottom:6}},
+div(null,
+div({style:{fontSize:13,fontWeight:800,color:TXT}},o.service),
+div({style:{fontSize:11,color:MUT,fontFamily:MN,marginTop:1}},o.id+” - “+fmtDate(o.createdAt))
+),
+div({style:{textAlign:“right”}},
+div({style:{fontSize:14,fontWeight:700,color:BLU,fontFamily:MN}},fmtPeso(o.amount)),
+C(Badge,{color:st.color,bg:st.bg},st.icon+” “+st.label)
+)
+),
+div({style:{display:“flex”,justifyContent:“space-between”,alignItems:“center”,marginTop:6}},
+div({style:{fontSize:11,color:MUT}},
+o.weightKg+“kg - Due: “+fmtDate(o.dueDate),
+inv?sp({style:{marginLeft:6}},C(Badge,{color:inv.status===“paid”?GRN:ORG,bg:inv.status===“paid”?GLT:OLT},inv.status===“paid”?“Paid”:“Unpaid”)):null
+),
+inv?btn({onClick:function(){setShowInv(o);},style:{background:BDL,border:“1px solid “+BLU+“30”,color:BLU,borderRadius:8,padding:“5px 12px”,fontSize:11,fontWeight:700,cursor:“pointer”,fontFamily:SS}},“Print Invoice”):null
+)
+);
+})
+)
+);
+}
+
+function ClientProfile(p){
+var c=p.client;
+var s1=useState(“overview”),tab=s1[0],setTab=s1[1];
+var s2=useState(false),editMode=s2[0],setEditMode=s2[1];
+var col=TCOL[c.type]||MUT;
+var cOrds=p.orders.filter(function(o){return o.clientId===c.id;});
+var activeOrds=cOrds.filter(function(o){return o.status!==“delivered”&&o.status!==“cancelled”;}).length;
+
+function saveClient(updated){
+p.setClients(function(prev){return prev.map(function(x){return x.id===updated.id?updated:x;});});
+setEditMode(false);
+p.showToast(“Client updated”);
+p.onRefresh(updated);
+}
+
+if(editMode){
+return div(null,
+div({style:{display:“flex”,alignItems:“center”,gap:10,marginBottom:14,paddingBottom:12,borderBottom:“1px solid “+BDR}},
+btn({onClick:function(){setEditMode(false);},style:{background:BG,border:“none”,borderRadius:20,width:30,height:30,fontSize:13,cursor:“pointer”,color:MUT,fontFamily:SS}},”< Back”),
+div({style:{fontSize:15,fontWeight:800,color:TXT}},“Edit: “+c.name)
+),
+C(ClientEditForm,{client:c,currentUser:p.currentUser,showToast:p.showToast,onSave:saveClient,onCancel:function(){setEditMode(false);}})
+);
+}
+
+var tabBtn=function(id,label){
+var active=tab===id;
+return btn({key:id,onClick:function(){setTab(id);},style:{flex:1,padding:“9px”,borderRadius:9,border:“none”,background:active?CRD:“transparent”,color:active?TXT:MUT,fontSize:13,fontWeight:active?700:500,cursor:“pointer”,fontFamily:SS,boxShadow:active?SHD:“none”}},label);
+};
+
+return div(null,
+div({style:{display:“flex”,gap:12,alignItems:“center”,padding:“16px”,background:col+“10”,borderRadius:14,marginBottom:16}},
+C(Avatar,{name:c.name,size:52}),
+div({style:{flex:1,minWidth:0}},
+div({style:{fontSize:16,fontWeight:700,color:TXT,marginBottom:3}},c.name),
+div({style:{display:“flex”,gap:6,flexWrap:“wrap”}},
+C(Badge,{color:col,bg:col+“18”},c.type),
+activeOrds>0?C(Badge,{color:ORG,bg:OLT},activeOrds+” active orders”):null,
+c.outstandingBalance>0?C(Badge,{color:RED,bg:RLT},“Balance: “+fmtPeso(c.outstandingBalance)):null
+),
+div({style:{fontSize:11,color:MUT,marginTop:5}},“Client since “+fmtDate(c.joinDate))
+),
+btn({onClick:function(){setEditMode(true);},style:{background:BG,border:“1.5px solid “+BDR,borderRadius:11,padding:“8px 13px”,color:TXT,fontSize:12,fontWeight:700,cursor:“pointer”,fontFamily:SS,flexShrink:0}},“Edit”)
+),
+div({style:{display:“flex”,background:BG,borderRadius:12,padding:3,marginBottom:16}},
+tabBtn(“overview”,“Overview”),tabBtn(“history”,“History”),tabBtn(“info”,“Info”)
+),
+tab===“overview”?div(null,
+div({style:{display:“grid”,gridTemplateColumns:“1fr 1fr”,gap:10,marginBottom:10}},
+C(StatCard,{label:“Total Orders”,value:c.totalOrders,color:BLU}),
+C(StatCard,{label:“Revenue”,value:fmtPeso(c.totalSpent),color:GRN})
+),
+div({style:{display:“grid”,gridTemplateColumns:“1fr 1fr”,gap:10,marginBottom:10}},
+C(StatCard,{label:“Outstanding”,value:fmtPeso(c.outstandingBalance||0),color:c.outstandingBalance>0?RED:GRN}),
+C(StatCard,{label:“Active Orders”,value:activeOrds,color:activeOrds>0?ORG:MUT})
+),
+c.creditLimit>0?div({style:{background:PLT,borderRadius:12,padding:“10px 13px”,marginBottom:10,display:“flex”,justifyContent:“space-between”}},sp({style:{fontSize:12,color:PUR,fontWeight:700}},“Credit Limit”),sp({style:{fontSize:13,fontWeight:800,color:PUR,fontFamily:MN}},fmtPeso(c.creditLimit))):null,
+c.paymentTerms?div({style:{background:BDL,borderRadius:12,padding:“10px 13px”,marginBottom:10,display:“flex”,justifyContent:“space-between”}},sp({style:{fontSize:12,color:BLU,fontWeight:700}},“Payment Terms”),sp({style:{fontSize:13,fontWeight:800,color:BLU}},c.paymentTerms)):null,
+c.notes?div({style:{background:BDL,borderRadius:12,padding:“12px 14px”,marginBottom:12}},div({style:{fontSize:11,fontWeight:700,color:BLU,marginBottom:4}},“NOTES”),div({style:{fontSize:13,color:SUB,lineHeight:1.6}},c.notes)):null,
+c.preferences?div({style:{background:PLT,borderRadius:12,padding:“12px 14px”,marginBottom:12}},div({style:{fontSize:11,fontWeight:700,color:PUR,marginBottom:4}},“PREFERENCES”),div({style:{fontSize:13,color:SUB,lineHeight:1.6}},c.preferences)):null,
+C(PrimaryBtn,{onClick:function(){p.onNewOrder(c);},col:col,col2:col},”+ New Order for This Client”)
+):null,
+tab===“history”?C(ClientHistory,{client:c,orders:p.orders,invoices:p.invoices}):null,
+tab===“info”?div(null,
+C(Crd,null,
+[[“Contact”,c.contact||”–”],[“Phone”,c.phone||”–”],[“Email”,c.email||”–”],[“Address”,c.address||”–”],[“City”,c.city||”–”],[“Payment Terms”,c.paymentTerms||”–”],[“Credit Limit”,c.creditLimit>0?fmtPeso(c.creditLimit):”–”]].map(function(r,i,arr){
+return div({key:r[0],style:{display:“flex”,justifyContent:“space-between”,padding:“11px 14px”,borderBottom:i<arr.length-1?“1px solid “+BDR:“none”}},
+sp({style:{color:MUT,fontSize:12,flexShrink:0,minWidth:90}},r[0]),
+sp({style:{color:TXT,fontSize:13,fontWeight:600,textAlign:“right”,flex:1}},r[1])
+);
+})
+),
+div({style:{marginTop:12}},
+btn({onClick:function(){setEditMode(true);},style:{width:“100%”,padding:“13px”,borderRadius:13,border:“1.5px solid “+BDR,background:BG,color:TXT,fontSize:14,fontWeight:700,cursor:“pointer”,fontFamily:SS}},“Edit Client Information”)
+)
+):null
+);
+}
+
+// === DASHBOARD ===
+function Dashboard(p){
+var user=p.currentUser,ords=p.orders,invs=p.invoices,inv=p.inventory;
+var myOrds=user.role===“admin”?ords:ords.filter(function(o){return o.agentId===user.id;});
+var activeOrd=myOrds.filter(function(o){return o.status!==“delivered”&&o.status!==“cancelled”;}).length;
+var readyOrds=myOrds.filter(function(o){return o.status===“ready”;});
+var unpaidTot=invs.filter(function(i){return i.status===“unpaid”;}).reduce(function(s,i){return s+i.totalAmount;},0);
+var lowStk=inv.filter(function(i){return i.stock<=i.minStock;}).length;
+var wkData=[{l:“Mon”,v:8200},{l:“Tue”,v:11500},{l:“Wed”,v:9800},{l:“Thu”,v:13200},{l:“Fri”,v:10500},{l:“Sat”,v:7400},{l:“Sun”,v:5400}];
+var qacts=[{icon:“📦”,label:“New Order”,tab:“orders”},{icon:“👥”,label:“Clients”,tab:“clients”},{icon:“💰”,label:“Billing”,tab:“billing”},{icon:“📊”,label:“Reports”,tab:“reports”}];
+return div({className:“fu”,style:{padding:“16px”,paddingBottom:110}},
+div({style:{marginBottom:18}},
+div({style:{fontSize:13,color:MUT}},“Welcome back,”),
+div({style:{fontSize:24,fontWeight:700,color:TXT,letterSpacing:”-0.03em”}},user.name+” 👋”),
+div({style:{display:“flex”,gap:6,marginTop:5,alignItems:“center”}},
+C(Badge,{color:RCOL[user.role]||BLU,bg:(RCOL[user.role]||BLU)+“18”},ROLES[user.role]||user.role),
+sp({style:{fontSize:11,color:MUT}},user.company)
+)
+),
+div({style:{display:“grid”,gridTemplateColumns:“1fr 1fr”,gap:12,marginBottom:12}},
+C(StatCard,{label:“Active Orders”,value:activeOrd,sub:“In pipeline”,color:BLU,big:true}),
+C(StatCard,{label:“Ready to Send”,value:readyOrds.length,sub:“Awaiting pickup”,color:GRN,big:true})
+),
+div({style:{display:“grid”,gridTemplateColumns:“1fr 1fr”,gap:12,marginBottom:20}},
+C(StatCard,{label:“Receivables”,value:fmtPeso(unpaidTot),color:ORG}),
+C(StatCard,{label:“Low Stock”,value:lowStk+” items”,color:lowStk>0?RED:GRN})
+),
+div({style:{marginBottom:18}},
+C(SecT,null,“Weekly Revenue”),
+C(Crd,{style:{padding:“16px”}},
+div({style:{display:“flex”,justifyContent:“space-between”,alignItems:“baseline”,marginBottom:10}},
+div(null,
+div({style:{fontSize:22,fontWeight:700,color:TXT,fontFamily:MN}},fmtPeso(65900)),
+div({style:{fontSize:11,color:MUT}},“This week”)
+),
+div({style:{fontSize:11,color:GRN,fontWeight:700,background:GLT,borderRadius:20,padding:“4px 10px”}},”+ 14% vs last week”)
+),
+C(MiniBar,{data:wkData,h:60})
+)
+),
+readyOrds.length>0?div({style:{marginBottom:18}},
+C(SecT,null,“Ready for Delivery (”+readyOrds.length+”)”),
+readyOrds.slice(0,3).map(function(o){
+return div({key:o.id,style:{background:GLT,border:“1.5px solid “+GRN+“40”,borderRadius:13,padding:“11px 13px”,display:“flex”,alignItems:“center”,gap:10,marginBottom:8}},
+div({style:{fontSize:20}},“✅”),
+div({style:{flex:1}},
+div({style:{fontSize:13,fontWeight:700,color:TXT}},o.clientName),
+div({style:{fontSize:11,color:SUB}},o.service+” - “+o.weightKg+“kg - “+fmtPeso(o.amount))
+),
+btn({onClick:function(){p.setTab(“orders”);},style:{background:GRN,border:“none”,color:”#fff”,borderRadius:9,padding:“6px 11px”,fontSize:11,fontWeight:700,cursor:“pointer”,fontFamily:SS}},“View”)
+);
+})
+):null,
+div({style:{marginBottom:18}},
+div({style:{display:“flex”,justifyContent:“space-between”,alignItems:“center”,marginBottom:6}},
+C(SecT,null,“Recent Orders”),
+btn({onClick:function(){p.setTab(“orders”);},style:{background:“none”,border:“none”,color:BLU,fontSize:12,cursor:“pointer”,fontFamily:SS,fontWeight:600}},“See all”)
+),
+C(Crd,null,
+myOrds.slice(0,4).map(function(o,i){
+var st=ORDS[o.status];
+return div({key:o.id,style:{display:“flex”,alignItems:“center”,padding:“11px 14px”,borderBottom:i<3?“1px solid “+BDR:“none”,gap:10}},
+div({style:{fontSize:13,width:26,textAlign:“center”,fontFamily:MN,fontWeight:700,color:st.color}},”[”+st.icon+”]”),
+div({style:{flex:1,minWidth:0}},
+div({style:{fontSize:12,fontWeight:700,color:TXT,overflow:“hidden”,textOverflow:“ellipsis”,whiteSpace:“nowrap”}},o.clientName),
+div({style:{fontSize:10,color:MUT}},o.service+” - “+o.id)
+),
+div({style:{textAlign:“right”}},
+div({style:{fontSize:12,fontWeight:700,fontFamily:MN,color:TXT}},fmtPeso(o.amount)),
+C(Badge,{color:st.color,bg:st.bg},st.label)
+)
+);
+})
+)
+),
+div({style:{marginBottom:10}},
+C(SecT,null,“Quick Actions”),
+div({style:{display:“grid”,gridTemplateColumns:“1fr 1fr”,gap:10}},
+qacts.map(function(a){
+return btn({key:a.tab,onClick:function(){p.setTab(a.tab);},style:{background:CRD,border:“1px solid “+BDR,borderRadius:14,padding:“14px”,display:“flex”,flexDirection:“column”,gap:6,cursor:“pointer”,boxShadow:SHD,textAlign:“left”,fontFamily:SS}},
+div({style:{fontSize:28}},a.icon),
+div({style:{fontSize:13,fontWeight:700,color:TXT}},a.label)
+);
+})
+)
+)
+);
+}
+
+// === ORDERS ===
+function Orders(p){
+var s1=useState(“all”),filter=s1[0],setFilter=s1[1];
+var s2=useState(””),search=s2[0],setSearch=s2[1];
+var s3=useState(false),showNew=s3[0],setShowNew=s3[1];
+var s4=useState(null),viewOrd=s4[0],setViewOrd=s4[1];
+var s5=useState(null),printOrd=s5[0],setPrintOrd=s5[1];
+var s6=useState({clientId:””,clientName:””,service:SVC[0],weightKg:””,amount:””,pickupDate:todayISO(),dueDate:””,notes:””,priority:“normal”,assignedTo:””}),form=s6[0],setForm=s6[1];
+function setF(k){return function(v){setForm(function(prev){var n=Object.assign({},prev);n[k]=v;return n;});};}
+var myOrds=p.currentUser.role===“admin”?p.orders:p.orders.filter(function(o){return o.agentId===p.currentUser.id;});
+var filtered=myOrds.filter(function(o){
+var mf=filter===“all”||o.status===filter;
+var ms=!search||o.clientName.toLowerCase().includes(search.toLowerCase())||o.id.toLowerCase().includes(search.toLowerCase());
+return mf&&ms;
+});
+var printInv=printOrd?p.invoices.find(function(i){return i.orderId===printOrd.id;}):null;
+var printCli=printOrd?p.clients.find(function(c){return c.id===printOrd.clientId;}):null;
+function saveOrder(){
+if(!form.clientId){p.showToast(“Select a client”,“error”);return;}
+if(!form.weightKg||!form.amount){p.showToast(“Enter weight and amount”,“error”);return;}
+var no={id:mkId(“ORD”),clientId:form.clientId,clientName:form.clientName,service:form.service,weightKg:parseFloat(form.weightKg)||0,status:“received”,priority:form.priority,pickupDate:form.pickupDate,dueDate:form.dueDate,deliveredDate:null,amount:parseFloat(form.amount)||0,paid:false,notes:form.notes,createdAt:todayISO(),assignedTo:form.assignedTo,agentId:p.currentUser.id,invoiceId:””};
+var ctr=(lsGet(“nlcrm_inv_counter”)||6)+1;lsSet(“nlcrm_inv_counter”,ctr);
+var invNo=“NRTK-”+new Date().getFullYear()+”-”+ctr.toString().padStart(3,“0”);
+var ni={id:mkId(“INV”),invoiceNo:invNo,clientId:no.clientId,clientName:no.clientName,orderId:no.id,amount:no.amount,tax:0,discount:0,totalAmount:no.amount,status:“unpaid”,dueDate:form.dueDate||””,issuedDate:todayISO(),paidDate:null,notes:””,agentId:p.currentUser.id,agentName:p.currentUser.name};
+no.invoiceId=ni.id;
+p.setOrders(function(prev){return[no].concat(prev);});
+p.setInvoices(function(prev){return[ni].concat(prev);});
+setShowNew(false);
+setForm({clientId:””,clientName:””,service:SVC[0],weightKg:””,amount:””,pickupDate:todayISO(),dueDate:””,notes:””,priority:“normal”,assignedTo:””});
+p.showToast(“Order “+no.id+” created + invoice “+invNo);
+}
+function updateStatus(id,status){
+p.setOrders(function(prev){return prev.map(function(o){return o.id===id?Object.assign({},o,{status:status,deliveredDate:status===“delivered”?todayISO():o.deliveredDate}):o;});});
+setViewOrd(null);
+p.showToast(“Status: “+ORDS[status].label);
+}
+var counts={all:myOrds.length};Object.keys(ORDS).forEach(function(k){counts[k]=myOrds.filter(function(o){return o.status===k;}).length;});
+var filterBtns=[[“all”,“All”,counts.all]].concat(Object.keys(ORDS).map(function(k){return[k,ORDS[k].label,counts[k]];}));
+return div(null,
+printOrd&&printInv?C(InvoicePrint,{invoice:printInv,order:printOrd,client:printCli,onClose:function(){setPrintOrd(null);}}):null,
+div({className:“ios-nav no-print”,style:{padding:“14px 16px 10px”,position:“sticky”,top:0,zIndex:100}},
+div({style:{display:“flex”,justifyContent:“space-between”,alignItems:“center”,marginBottom:12}},
+div({style:{fontSize:22,fontWeight:700,color:TXT,letterSpacing:”-0.03em”}},“Orders”),
+btn({onClick:function(){setShowNew(true);},style:{background:BLU,border:“none”,color:”#fff”,borderRadius:20,padding:“8px 16px”,fontSize:15,fontWeight:500,cursor:“pointer”,fontFamily:SS}},”+  New”)
+),
+inp({value:search,onChange:function(ev){setSearch(ev.target.value);},placeholder:“Search orders or clients…”,className:“ios-inp”,style:{marginBottom:10}}),
+div({className:“chip-row”},
+filterBtns.map(function(item){
+var active=filter===item[0];
+var col=item[0]===“all”?BLU:(ORDS[item[0]]||{color:BLU}).color;
+return btn({key:item[0],onClick:function(){setFilter(item[0]);},style:{background:active?col:CRD,border:“none”,borderRadius:20,padding:“6px 14px”,color:active?”#fff”:MUT,fontSize:12,fontWeight:active?600:400,cursor:“pointer”,fontFamily:SS,whiteSpace:“nowrap”,flexShrink:0,boxShadow:active?“none”:SHD}},item[1]+” (”+item[2]+”)”);
+})
+)
+),
+div({className:“no-print”,style:{padding:“12px 16px”,paddingBottom:110}},
+filtered.length===0?C(EmptyState,{icon:”?”,title:“No orders found”,desc:“Tap + New to create one.”,action:”+ New Order”,onAction:function(){setShowNew(true);}}):null,
+div({style:{display:“flex”,flexDirection:“column”,gap:10}},
+filtered.map(function(o){
+var st=ORDS[o.status];
+var overdue=o.dueDate&&o.dueDate<todayISO()&&o.status!==“delivered”&&o.status!==“cancelled”;
+return div({key:o.id,onClick:function(){setViewOrd(o);},className:“pressable”,style:{background:CRD,borderRadius:14,padding:“14px”,cursor:“pointer”,borderLeft:“4px solid “+(overdue?RED:st.color)}},
+div({style:{display:“flex”,justifyContent:“space-between”,alignItems:“flex-start”,marginBottom:7}},
+div({style:{flex:1,marginRight:8}},
+div({style:{fontSize:16,fontWeight:600,color:TXT,marginBottom:2,overflow:“hidden”,textOverflow:“ellipsis”,whiteSpace:“nowrap”,letterSpacing:”-0.02em”}},o.clientName),
+div({style:{fontSize:12,color:MUT,fontFamily:MN}},o.id+” - “+fmtDate(o.createdAt))
+),
+div({style:{display:“flex”,flexDirection:“column”,gap:3,alignItems:“flex-end”}},
+C(Badge,{color:st.color,bg:st.bg},st.icon+” “+st.label),
+o.priority===“urgent”?C(Badge,{color:RED,bg:RLT},”!! URGENT”):null,
+overdue?C(Badge,{color:RED,bg:RLT},“OVERDUE”):null
+)
+),
+div({style:{display:“flex”,justifyContent:“space-between”,alignItems:“center”}},
+div({style:{fontSize:11,color:MUT}},o.service+” - “+o.weightKg+“kg - Due “+fmtDate(o.dueDate)),
+div({style:{fontSize:15,fontWeight:700,color:BLU,fontFamily:MN}},fmtPeso(o.amount))
+),
+o.assignedTo?div({style:{fontSize:10,color:MUT,marginTop:4}},“Assigned: “+o.assignedTo):null
+);
+})
+)
+),
+C(ModalSheet,{open:showNew,title:“New Order”,onClose:function(){setShowNew(false);}},
+C(FRow,{label:“Client *”},
+C(FSel,{value:form.clientId,onChange:function(v){var c=p.clients.find(function(x){return x.id===v;});setForm(Object.assign({},form,{clientId:v,clientName:c?c.name:””}));}},
+C(“option”,{value:””},“Select client…”),
+p.clients.map(function(c){return C(“option”,{key:c.id,value:c.id},c.name+” (”+c.type+”)”);})
+)
+),
+C(FRow,{label:“Service”},C(FSel,{value:form.service,onChange:setF(“service”)},SVC.map(function(s){return C(“option”,{key:s,value:s},s);}))),
+div({style:{display:“grid”,gridTemplateColumns:“1fr 1fr”,gap:10}},
+C(FRow,{label:“Weight (kg) *”},C(FInp,{value:form.weightKg,onChange:setF(“weightKg”),type:“number”,placeholder:“0.00”})),
+C(FRow,{label:“Amount (PHP) *”},C(FInp,{value:form.amount,onChange:setF(“amount”),type:“number”,placeholder:“0.00”}))
+),
+div({style:{display:“grid”,gridTemplateColumns:“1fr 1fr”,gap:10}},
+C(FRow,{label:“Pickup Date”},C(FInp,{value:form.pickupDate,onChange:setF(“pickupDate”),type:“date”})),
+C(FRow,{label:“Due Date”},C(FInp,{value:form.dueDate,onChange:setF(“dueDate”),type:“date”}))
+),
+C(FRow,{label:“Priority”},
+div({style:{display:“flex”,gap:8}},
+[[“normal”,“Normal”],[“urgent”,”!! Urgent”]].map(function(pp){
+var active=form.priority===pp[0];
+return btn({key:pp[0],onClick:function(){setF(“priority”)(pp[0]);},style:{flex:1,padding:“9px”,borderRadius:11,border:“1.5px solid “+(active?(pp[0]===“urgent”?RED:BLU):BDR),background:active?(pp[0]===“urgent”?RLT:BDL):“transparent”,color:active?(pp[0]===“urgent”?RED:BLU):MUT,fontSize:13,fontWeight:700,cursor:“pointer”,fontFamily:SS}},pp[1]);
+})
+)
+),
+C(FRow,{label:“Notes”},C(FTxt,{value:form.notes,onChange:setF(“notes”),placeholder:“Special instructions…”,rows:2})),
+C(PrimaryBtn,{onClick:saveOrder},“Create Order + Auto-Invoice”)
+),
+C(ModalSheet,{open:!!viewOrd,title:“Order “+((viewOrd&&viewOrd.id)||””),onClose:function(){setViewOrd(null);}},
+viewOrd?div(null,
+div({style:{background:ORDS[viewOrd.status].bg,border:“1.5px solid “+ORDS[viewOrd.status].color+“40”,borderRadius:13,padding:“14px”,marginBottom:14,display:“flex”,gap:12,alignItems:“center”}},
+div({style:{fontSize:26,fontFamily:MN,fontWeight:700,color:ORDS[viewOrd.status].color}},”[”+ORDS[viewOrd.status].icon+”]”),
+div(null,
+div({style:{color:ORDS[viewOrd.status].color,fontSize:18,fontWeight:700}},ORDS[viewOrd.status].label),
+div({style:{fontSize:12,color:MUT,marginTop:1}},viewOrd.clientName)
+)
+),
+C(Crd,{style:{marginBottom:12}},
+[[“Service”,viewOrd.service],[“Weight”,viewOrd.weightKg+“kg”],[“Amount”,fmtPeso(viewOrd.amount)],[“Pickup”,fmtDate(viewOrd.pickupDate)],[“Due”,fmtDate(viewOrd.dueDate)],[“Assigned”,viewOrd.assignedTo||“Unassigned”],[“Priority”,viewOrd.priority.toUpperCase()]].map(function(r,i,arr){
+return div({key:r[0],style:{display:“flex”,justifyContent:“space-between”,padding:“9px 14px”,borderBottom:i<arr.length-1?“1px solid “+BDR:“none”}},
+sp({style:{color:MUT,fontSize:12}},r[0]),sp({style:{color:TXT,fontSize:13,fontWeight:600}},r[1])
+);
+})
+),
+viewOrd.notes?div({style:{background:OLT,borderRadius:11,padding:“11px 13px”,fontSize:13,color:SUB,marginBottom:12}},“Note: “+viewOrd.notes):null,
+C(SecT,null,“Update Status”),
+div({style:{display:“flex”,flexWrap:“wrap”,gap:7,marginBottom:16}},
+Object.keys(ORDS).map(function(k){
+var s=ORDS[k],active=viewOrd.status===k;
+return btn({key:k,onClick:function(){updateStatus(viewOrd.id,k);},style:{padding:“7px 13px”,borderRadius:20,border:“1.5px solid “+(active?s.color:BDR),background:active?s.bg:“transparent”,color:active?s.color:MUT,fontSize:12,fontWeight:700,cursor:“pointer”,fontFamily:SS}},s.icon+” “+s.label);
+})
+),
+btn({onClick:function(){setViewOrd(null);setPrintOrd(viewOrd);},style:{width:“100%”,padding:“13px”,borderRadius:13,border:“1.5px solid “+BLU,background:BDL,color:BLU,fontSize:14,fontWeight:700,cursor:“pointer”,fontFamily:SS}},“Print Invoice”)
+):null
+)
+);
+}
+
+// === CLIENTS ===
+function Clients(p){
+var s1=useState(””),search=s1[0],setSearch=s1[1];
+var s2=useState(“All”),typeF=s2[0],setTypeF=s2[1];
+var s3=useState(null),profile=s3[0],setProfile=s3[1];
+var filtered=p.clients.filter(function(c){
+var ms=!search||c.name.toLowerCase().includes(search.toLowerCase())||c.city.toLowerCase().includes(search.toLowerCase());
+var mt=typeF===“All”||c.type===typeF;
+return ms&&mt&&c.active;
+});
+if(profile){
+var cur=p.clients.find(function(c){return c.id===profile.id;})||profile;
+return div(null,
+div({className:“no-print”,style:{display:“flex”,alignItems:“center”,gap:10,padding:“14px”,borderBottom:“1px solid “+BDR,position:“sticky”,top:0,background:“rgba(242,242,247,0.96)”,backdropFilter:“blur(20px)”,zIndex:100}},
+btn({onClick:function(){setProfile(null);},style:{background:BG,border:“none”,borderRadius:20,width:32,height:32,fontSize:14,cursor:“pointer”,color:MUT,fontFamily:SS,flexShrink:0}},”< Back”),
+div({style:{fontSize:15,fontWeight:800,color:TXT,overflow:“hidden”,textOverflow:“ellipsis”,whiteSpace:“nowrap”}},cur.name)
+),
+div({style:{padding:“12px”,paddingBottom:100}},
+C(ClientProfile,{client:cur,orders:p.orders,invoices:p.invoices,currentUser:p.currentUser,showToast:p.showToast,
+setClients:p.setClients,onRefresh:function(u){setProfile(u);},
+onNewOrder:function(c){p.setTab(“orders”);}
+})
+)
+);
+}
+return div(null,
+div({className:“ios-nav no-print”,style:{padding:“14px 16px 10px”,position:“sticky”,top:0,zIndex:100}},
+div({style:{display:“flex”,justifyContent:“space-between”,alignItems:“center”,marginBottom:12}},
+div({style:{fontSize:22,fontWeight:700,color:TXT,letterSpacing:”-0.03em”}},“Clients”),
+C(Badge,{color:BLU,bg:BDL},filtered.length+” clients”)
+),
+inp({value:search,onChange:function(ev){setSearch(ev.target.value);},placeholder:“Search clients…”,className:“ios-inp”,style:{marginBottom:10}}),
+div({className:“chip-row”},
+[[“All”,“All”]].concat(CTYPES.map(function(t){return[t,t];})).map(function(item){
+var active=typeF===item[0];
+var col=TCOL[item[0]]||BLU;
+return btn({key:item[0],onClick:function(){setTypeF(item[0]);},style:{background:active?col:CRD,border:“none”,borderRadius:20,padding:“6px 14px”,color:active?”#fff”:MUT,fontSize:12,fontWeight:active?600:400,cursor:“pointer”,fontFamily:SS,whiteSpace:“nowrap”,flexShrink:0,boxShadow:active?“none”:SHD}},item[1]);
+})
+)
+),
+div({style:{padding:“12px”,paddingBottom:100}},
+filtered.length===0?C(EmptyState,{icon:”?”,title:“No clients”,desc:“No clients found.”}):null,
+div({style:{display:“flex”,flexDirection:“column”,gap:10}},
+filtered.map(function(c){
+var col=TCOL[c.type]||MUT;
+var cOrds=p.orders.filter(function(o){return o.clientId===c.id&&o.status!==“delivered”&&o.status!==“cancelled”;}).length;
+return div({key:c.id,onClick:function(){setProfile(c);},className:“pressable”,style:{background:CRD,borderRadius:14,padding:“14px”,cursor:“pointer”,display:“flex”,gap:12,alignItems:“center”}},
+C(Avatar,{name:c.name,size:44}),
+div({style:{flex:1,minWidth:0}},
+div({style:{fontSize:16,fontWeight:600,color:TXT,overflow:“hidden”,textOverflow:“ellipsis”,whiteSpace:“nowrap”,letterSpacing:”-0.02em”}},c.name),
+div({style:{display:“flex”,gap:6,marginTop:4,flexWrap:“wrap”}},
+C(Badge,{color:col,bg:col+“18”},c.type),
+cOrds>0?C(Badge,{color:ORG,bg:OLT},cOrds+” orders”):null,
+c.outstandingBalance>0?C(Badge,{color:RED,bg:RLT},“Bal: “+fmtPeso(c.outstandingBalance)):null
+),
+div({style:{fontSize:11,color:MUT,marginTop:3}},c.city+” - “+c.contact)
+),
+div({style:{fontSize:13,fontWeight:800,color:TXT,textAlign:“right”,fontFamily:MN}},fmtPeso(c.totalSpent))
+);
+})
+)
+)
+);
+}
+
+// === BILLING ===
+function Billing(p){
+var s1=useState(“unpaid”),filter=s1[0],setFilter=s1[1];
+var s2=useState(null),viewInv=s2[0],setViewInv=s2[1];
+var myInvs=p.currentUser.role===“admin”?p.invoices:p.invoices.filter(function(i){return i.agentId===p.currentUser.id;});
+var filtered=myInvs.filter(function(i){return filter===“all”||i.status===filter;});
+var totalUnpaid=myInvs.filter(function(i){return i.status===“unpaid”;}).reduce(function(s,i){return s+i.totalAmount;},0);
+var totalPaid=myInvs.filter(function(i){return i.status===“paid”;}).reduce(function(s,i){return s+i.totalAmount;},0);
+var today=todayISO();
+function markPaid(inv){
+p.setInvoices(function(prev){return prev.map(function(i){return i.id===inv.id?Object.assign({},i,{status:“paid”,paidDate:today}):i;});});
+p.setOrders(function(prev){return prev.map(function(o){return o.id===inv.orderId?Object.assign({},o,{paid:true}):o;});});
+setViewInv(null);p.showToast(“Invoice “+inv.invoiceNo+” marked as paid”);
+}
+var viewOrd=viewInv?p.orders.find(function(o){return o.id===viewInv.orderId;}):null;
+var viewCli=viewInv?p.clients.find(function(c){return c.id===viewInv.clientId;}):null;
+return div(null,
+viewInv?C(InvoicePrint,{invoice:viewInv,order:viewOrd,client:viewCli,onClose:function(){setViewInv(null);}}):null,
+div({className:“ios-nav no-print”,style:{padding:“14px 16px 10px”,position:“sticky”,top:0,zIndex:100}},
+div({style:{fontSize:22,fontWeight:700,color:TXT,marginBottom:10}},”\u20B1 Billing”),
+div({style:{display:“grid”,gridTemplateColumns:“1fr 1fr”,gap:8,marginBottom:10}},
+div({style:{background:RLT,borderRadius:11,padding:“10px 12px”}},div({style:{fontSize:10,color:RED,fontWeight:700,marginBottom:3}},“OUTSTANDING”),div({style:{fontSize:14,fontWeight:700,color:RED,fontFamily:MN}},fmtPeso(totalUnpaid))),
+div({style:{background:GLT,borderRadius:11,padding:“10px 12px”}},div({style:{fontSize:10,color:GRN,fontWeight:700,marginBottom:3}},“COLLECTED”),div({style:{fontSize:14,fontWeight:700,color:GRN,fontFamily:MN}},fmtPeso(totalPaid)))
+),
+div({style:{display:“flex”,gap:6}},
+[[“unpaid”,“Unpaid”],[“paid”,“Paid”],[“all”,“All”]].map(function(f){
+var active=filter===f[0];
+var col=f[0]===“unpaid”?ORG:f[0]===“paid”?GRN:MUT;
+return btn({key:f[0],onClick:function(){setFilter(f[0]);},style:{flex:1,padding:“8px”,borderRadius:20,border:“1.5px solid “+(active?col:BDR),background:active?col+“18”:“transparent”,color:active?col:MUT,fontSize:12,fontWeight:700,cursor:“pointer”,fontFamily:SS}},f[1]);
+})
+)
+),
+div({className:“no-print”,style:{padding:“12px 16px”,paddingBottom:110}},
+filtered.length===0?C(EmptyState,{icon:”\u20B1”,title:“No invoices”,desc:“Invoices will appear here.”}):null,
+div({style:{display:“flex”,flexDirection:“column”,gap:10}},
+filtered.map(function(inv){
+var isPaid=inv.status===“paid”;
+var overdue=!isPaid&&inv.dueDate&&inv.dueDate<today;
+return div({key:inv.id,style:{background:CRD,borderRadius:15,padding:“13px”,boxShadow:SHD,borderLeft:“4px solid “+(overdue?RED:isPaid?GRN:ORG)}},
+div({style:{display:“flex”,justifyContent:“space-between”,alignItems:“flex-start”,marginBottom:7}},
+div(null,
+div({style:{fontSize:14,fontWeight:800,color:TXT}},inv.clientName),
+div({style:{fontSize:11,color:MUT,fontFamily:MN,marginTop:1}},inv.invoiceNo+” - “+fmtDate(inv.issuedDate))
+),
+div({style:{textAlign:“right”}},
+div({style:{fontSize:16,fontWeight:700,color:isPaid?GRN:ORG,fontFamily:MN}},fmtPeso(inv.totalAmount)),
+C(Badge,{color:isPaid?GRN:overdue?RED:ORG,bg:isPaid?GLT:overdue?RLT:OLT},isPaid?“PAID”:overdue?“OVERDUE”:“UNPAID”)
+)
+),
+div({style:{display:“flex”,gap:7,marginTop:6}},
+btn({onClick:function(){setViewInv(inv);},style:{flex:1,padding:“8px”,borderRadius:10,border:“1px solid “+BDR,background:BG,color:TXT,fontSize:12,fontWeight:700,cursor:“pointer”,fontFamily:SS}},“Print”),
+!isPaid?btn({onClick:function(){markPaid(inv);},style:{flex:1,padding:“8px”,borderRadius:10,border:“1px solid “+GRN,background:GLT,color:GRN,fontSize:12,fontWeight:700,cursor:“pointer”,fontFamily:SS}},“Mark Paid”):null
+)
+);
+})
+)
+)
+);
+}
+
+// === INVENTORY ===
+function Inventory(p){
+var s1=useState(””),search=s1[0],setSearch=s1[1];
+var s2=useState(false),showAdd=s2[0],setShowAdd=s2[1];
+var s3=useState({name:””,stock:””,minStock:””,pricePerUnit:””,unit:“L”}),form=s3[0],setForm=s3[1];
+function setF(k){return function(v){setForm(function(prev){var n=Object.assign({},prev);n[k]=v;return n;});};}
+var filtered=p.inventory.filter(function(i){return !search||i.name.toLowerCase().includes(search.toLowerCase());});
+var lowItems=p.inventory.filter(function(i){return i.stock<=i.minStock;});
+function restock(id){
+p.setInventory(function(prev){return prev.map(function(i){if(i.id!==id)return i;var ms=i.minStock*3;return Object.assign({},i,{stock:ms,lastRestocked:todayISO()});});});
+p.showToast(“Restocked to recommended level”);
+}
+function addItem(){
+if(!form.name.trim()||!form.stock){p.showToast(“Name and stock required”,“error”);return;}
+var ni={id:mkId(“CHM”),name:form.name.trim(),unit:form.unit,pricePerUnit:parseFloat(form.pricePerUnit)||0,stock:parseFloat(form.stock)||0,minStock:parseFloat(form.minStock)||5,lastRestocked:todayISO()};
+p.setInventory(function(prev){return prev.concat([ni]);});
+setShowAdd(false);setForm({name:””,stock:””,minStock:””,pricePerUnit:””,unit:“L”});
+p.showToast(“Item added”);
+}
+return div(null,
+div({className:“ios-nav no-print”,style:{padding:“14px 16px 10px”,position:“sticky”,top:0,zIndex:100}},
+div({style:{display:“flex”,justifyContent:“space-between”,alignItems:“center”,marginBottom:10}},
+div({style:{fontSize:22,fontWeight:700,color:TXT,letterSpacing:”-0.03em”}},“Inventory”),
+btn({onClick:function(){setShowAdd(true);},style:{background:“linear-gradient(135deg,”+GRN+”,#00AA30)”,border:“none”,color:”#fff”,borderRadius:11,padding:“8px 15px”,fontSize:13,fontWeight:700,cursor:“pointer”,fontFamily:SS}},”+ Add”)
+),
+lowItems.length>0?div({style:{background:RLT,border:“1px solid “+RED+“30”,borderRadius:11,padding:“9px 13px”,marginBottom:10,fontSize:12,color:RED,fontWeight:600}},“Low stock: “+lowItems.map(function(i){return i.name;}).join(”, “)):null,
+inp({value:search,onChange:function(ev){setSearch(ev.target.value);},placeholder:“Search chemicals…”,style:{width:“100%”,background:CRD,border:“1px solid “+BDR,borderRadius:11,padding:“8px 13px”,fontSize:14,outline:“none”,fontFamily:SS}})
+),
+div({style:{padding:“12px”,paddingBottom:100}},
+C(Crd,null,
+filtered.map(function(item,i){
+var low=item.stock<=item.minStock;
+var pct=Math.min(100,Math.round((item.stock/Math.max(item.minStock*3,1))*100));
+return div({key:item.id,style:{padding:“12px 14px”,borderBottom:i<filtered.length-1?“1px solid “+BDR:“none”}},
+div({style:{display:“flex”,justifyContent:“space-between”,alignItems:“flex-start”,marginBottom:5}},
+div({style:{flex:1,marginRight:8}},
+div({style:{fontSize:13,fontWeight:700,color:TXT}},item.name),
+div({style:{fontSize:11,color:MUT,marginTop:1}},item.stock+” “+item.unit+” available - Min: “+item.minStock+” “+item.unit)
+),
+div({style:{display:“flex”,gap:6,alignItems:“center”}},
+div({style:{fontSize:13,fontWeight:700,color:low?RED:GRN,fontFamily:MN}},item.stock+” “+item.unit),
+low?btn({onClick:function(){restock(item.id);},style:{background:OLT,border:“1px solid “+ORG,color:ORG,borderRadius:8,padding:“4px 9px”,fontSize:11,fontWeight:700,cursor:“pointer”,fontFamily:SS}},“📦 Restock”):null
+)
+),
+div({style:{height:4,background:BDR,borderRadius:2,overflow:“hidden”}},
+div({style:{height:“100%”,width:pct+”%”,background:low?RED:pct>60?GRN:ORG,borderRadius:2}})
+)
+);
+})
+)
+),
+C(ModalSheet,{open:showAdd,title:“Add Chemical”,onClose:function(){setShowAdd(false);}},
+C(FRow,{label:“Chemical Name *”},C(FInp,{value:form.name,onChange:setF(“name”),placeholder:“e.g. HE Liquid Detergent”})),
+C(FRow,{label:“Unit”},C(FSel,{value:form.unit,onChange:setF(“unit”)},[“L”,“kg”,“ml”,“pcs”].map(function(u){return C(“option”,{key:u,value:u},u);}))),
+div({style:{display:“grid”,gridTemplateColumns:“1fr 1fr”,gap:10}},
+C(FRow,{label:“Current Stock *”},C(FInp,{value:form.stock,onChange:setF(“stock”),type:“number”,placeholder:“0”})),
+C(FRow,{label:“Min Stock”},C(FInp,{value:form.minStock,onChange:setF(“minStock”),type:“number”,placeholder:“5”}))
+),
+C(FRow,{label:“Price per Unit (PHP)”},C(FInp,{value:form.pricePerUnit,onChange:setF(“pricePerUnit”),type:“number”,placeholder:“0.00”})),
+C(PrimaryBtn,{onClick:addItem,col:GRN,col2:”#00AA30”},“Add Chemical”)
+)
+);
+}
+
+// === STAFF ===
+function Staff(p){
+var s1=useState(false),showAdd=s1[0],setShowAdd=s1[1];
+var s2=useState({name:””,role:“Laundry Operator”,phone:””,shift:“Morning”}),form=s2[0],setForm=s2[1];
+function setF(k){return function(v){setForm(function(prev){var n=Object.assign({},prev);n[k]=v;return n;});};}
+function addStaff(){
+if(!form.name.trim()){p.showToast(“Name required”,“error”);return;}
+var ns={id:mkId(“STF”),name:form.name.trim(),role:form.role,phone:form.phone,shift:form.shift,status:“active”,ordersCompleted:0,joinDate:todayISO()};
+p.setStaff(function(prev){return prev.concat([ns]);});
+setShowAdd(false);setForm({name:””,role:“Laundry Operator”,phone:””,shift:“Morning”});
+p.showToast(form.name+” added to staff”);
+}
+function toggleStatus(id){
+p.setStaff(function(prev){return prev.map(function(s){return s.id===id?Object.assign({},s,{status:s.status===“active”?“off”:“active”}):s;});});
+}
+var active=p.staff.filter(function(s){return s.status===“active”;}).length;
+return div(null,
+div({className:“ios-nav no-print”,style:{padding:“14px 16px 10px”,position:“sticky”,top:0,zIndex:100}},
+div({style:{display:“flex”,justifyContent:“space-between”,alignItems:“center”,marginBottom:8}},
+div({style:{fontSize:22,fontWeight:700,color:TXT,letterSpacing:”-0.03em”}},“Staff”),
+btn({onClick:function(){setShowAdd(true);},style:{background:“linear-gradient(135deg,”+PUR+”,#8822CC)”,border:“none”,color:”#fff”,borderRadius:11,padding:“8px 15px”,fontSize:13,fontWeight:700,cursor:“pointer”,fontFamily:SS}},”+ Add”)
+),
+C(Badge,{color:GRN,bg:GLT},active+” on duty”)
+),
+div({style:{padding:“12px”,paddingBottom:100}},
+C(Crd,null,
+p.staff.map(function(s,i){
+var isActive=s.status===“active”;
+return div({key:s.id,style:{display:“flex”,gap:12,alignItems:“center”,padding:“12px 14px”,borderBottom:i<p.staff.length-1?“1px solid “+BDR:“none”}},
+C(Avatar,{name:s.name,size:40}),
+div({style:{flex:1,minWidth:0}},
+div({style:{fontSize:13,fontWeight:800,color:TXT}},s.name),
+div({style:{fontSize:11,color:MUT,marginTop:1}},s.role+” - “+s.shift+” shift”),
+div({style:{fontSize:10,color:MUT,marginTop:2}},s.ordersCompleted+” orders completed”)
+),
+div({style:{display:“flex”,flexDirection:“column”,gap:5,alignItems:“flex-end”}},
+C(Badge,{color:isActive?GRN:MUT,bg:isActive?GLT:BG},isActive?“On duty”:“Off”),
+btn({onClick:function(){toggleStatus(s.id);},style:{background:BG,border:“1px solid “+BDR,borderRadius:8,padding:“3px 9px”,fontSize:10,fontWeight:700,cursor:“pointer”,color:MUT,fontFamily:SS}},isActive?“Set Off”:“Set Active”)
+)
+);
+})
+)
+),
+C(ModalSheet,{open:showAdd,title:“Add Staff”,onClose:function(){setShowAdd(false);}},
+C(FRow,{label:“Full Name *”},C(FInp,{value:form.name,onChange:setF(“name”),placeholder:“Staff name”})),
+C(FRow,{label:“Role”},C(FSel,{value:form.role,onChange:setF(“role”)},[“Laundry Operator”,“Quality Inspector”,“Driver”,“Presser”,“Sorter”,“Admin”].map(function(r){return C(“option”,{key:r,value:r},r);}))),
+C(FRow,{label:“Phone”},C(FInp,{value:form.phone,onChange:setF(“phone”),placeholder:”+63…”})),
+C(FRow,{label:“Shift”},C(FSel,{value:form.shift,onChange:setF(“shift”)},[“Morning”,“Afternoon”,“Night”].map(function(s){return C(“option”,{key:s,value:s},s);}))),
+C(PrimaryBtn,{onClick:addStaff,col:PUR,col2:”#8822CC”},“Add Staff Member”)
+)
+);
+}
+
+// === REPORTS ===
+function Reports(p){
+var orders=p.orders,invs=p.invoices,clients=p.clients;
+var totalRev=invs.filter(function(i){return i.status===“paid”;}).reduce(function(s,i){return s+i.totalAmount;},0);
+var outstanding=invs.filter(function(i){return i.status===“unpaid”;}).reduce(function(s,i){return s+i.totalAmount;},0);
+var svcCounts={};orders.forEach(function(o){svcCounts[o.service]=(svcCounts[o.service]||0)+1;});
+var topSvcs=Object.keys(svcCounts).sort(function(a,b){return svcCounts[b]-svcCounts[a];}).slice(0,5);
+var cliRev={};orders.forEach(function(o){cliRev[o.clientName]=(cliRev[o.clientName]||0)+o.amount;});
+var topClis=Object.keys(cliRev).sort(function(a,b){return cliRev[b]-cliRev[a];}).slice(0,5);
+var maxCliRev=Math.max.apply(null,topClis.map(function(k){return cliRev[k];})||[1]);
+var maxSvc=Math.max.apply(null,topSvcs.map(function(k){return svcCounts[k];})||[1]);
+return div({className:“fu”,style:{padding:“16px”,paddingBottom:110}},
+div({style:{fontSize:22,fontWeight:700,color:TXT,marginBottom:14}},“Reports”),
+div({style:{display:“grid”,gridTemplateColumns:“1fr 1fr”,gap:10,marginBottom:16}},
+C(StatCard,{label:“Total Revenue”,value:fmtPeso(totalRev),color:GRN,big:true}),
+C(StatCard,{label:“Outstanding”,value:fmtPeso(outstanding),color:ORG,big:true})
+),
+div({style:{display:“grid”,gridTemplateColumns:“1fr 1fr 1fr”,gap:8,marginBottom:20}},
+C(StatCard,{label:“Total Orders”,value:orders.length,color:BLU}),
+C(StatCard,{label:“Total Clients”,value:clients.length,color:PUR}),
+C(StatCard,{label:“Avg Order”,value:fmtPeso(orders.length?orders.reduce(function(s,o){return s+o.amount;},0)/orders.length:0),color:TEA})
+),
+div({style:{marginBottom:20}},
+C(SecT,null,“Top Clients by Revenue”),
+C(Crd,null,
+topClis.map(function(name,i){
+var pct=Math.round((cliRev[name]/maxCliRev)*100);
+return div({key:name,style:{padding:“10px 14px”,borderBottom:i<topClis.length-1?“1px solid “+BDR:“none”}},
+div({style:{display:“flex”,justifyContent:“space-between”,marginBottom:5}},
+sp({style:{fontSize:12,fontWeight:700,color:TXT}},name),
+sp({style:{fontSize:12,fontWeight:800,color:GRN,fontFamily:MN}},fmtPeso(cliRev[name]))
+),
+div({style:{height:5,background:BDR,borderRadius:3,overflow:“hidden”}},
+div({style:{height:“100%”,width:pct+”%”,background:GRN,borderRadius:3}})
+)
+);
+})
+)
+),
+div({style:{marginBottom:20}},
+C(SecT,null,“Top Services”),
+C(Crd,null,
+topSvcs.map(function(name,i){
+var pct=Math.round((svcCounts[name]/maxSvc)*100);
+return div({key:name,style:{padding:“10px 14px”,borderBottom:i<topSvcs.length-1?“1px solid “+BDR:“none”}},
+div({style:{display:“flex”,justifyContent:“space-between”,marginBottom:5}},
+sp({style:{fontSize:12,fontWeight:700,color:TXT}},name),
+sp({style:{fontSize:11,color:MUT}},svcCounts[name]+” orders”)
+),
+div({style:{height:5,background:BDR,borderRadius:3,overflow:“hidden”}},
+div({style:{height:“100%”,width:pct+”%”,background:BLU,borderRadius:3}})
+)
+);
+})
+)
+)
+);
+}
+
+// === USERS TAB (admin only) ===
+function UsersTab(p){
+if(p.currentUser.role!==“admin”)return div({style:{padding:32,textAlign:“center”,color:MUT,fontSize:14}},“Admin access only.”);
+var users=p.users;
+var pending=users.filter(function(u){return u.pendingApproval;});
+function approve(id){p.setUsers(function(prev){return prev.map(function(u){return u.id===id?Object.assign({},u,{active:true,pendingApproval:false}):u;});});p.showToast(“Account approved”);}
+function toggleActive(id){p.setUsers(function(prev){return prev.map(function(u){return u.id===id?Object.assign({},u,{active:!u.active}):u;});});p.showToast(“Account updated”);}
+return div({className:“fu”,style:{padding:“16px”,paddingBottom:110}},
+div({style:{fontSize:28,fontWeight:700,color:TXT,marginBottom:18,letterSpacing:”-0.04em”}},“Users”),
+pending.length>0?div({style:{marginBottom:16}},
+C(SecT,null,“Pending Approval (”+pending.length+”)”),
+div({style:{display:“flex”,flexDirection:“column”,gap:8}},
+pending.map(function(u){
+return div({key:u.id,style:{background:OLT,border:“1.5px solid “+ORG+“40”,borderRadius:13,padding:“12px 13px”,display:“flex”,gap:10,alignItems:“center”}},
+C(Avatar,{name:u.name,size:38}),
+div({style:{flex:1}},
+div({style:{fontSize:13,fontWeight:800,color:TXT}},u.name),
+div({style:{fontSize:11,color:MUT}},u.email+” - “+ROLES[u.role]+” - “+u.company)
+),
+btn({onClick:function(){approve(u.id);},style:{background:GRN,border:“none”,color:”#fff”,borderRadius:9,padding:“7px 13px”,fontSize:12,fontWeight:700,cursor:“pointer”,fontFamily:SS}},“Approve”)
+);
+})
+)
+):null,
+C(SecT,null,“All Accounts”),
+C(Crd,null,
+users.map(function(u,i){
+return div({key:u.id,style:{display:“flex”,gap:10,alignItems:“center”,padding:“11px 14px”,borderBottom:i<users.length-1?“1px solid “+BDR:“none”}},
+C(Avatar,{name:u.name,size:36}),
+div({style:{flex:1,minWidth:0}},
+div({style:{fontSize:12,fontWeight:800,color:TXT,overflow:“hidden”,textOverflow:“ellipsis”,whiteSpace:“nowrap”}},u.name),
+div({style:{fontSize:10,color:MUT}},u.email+” - “+u.company)
+),
+div({style:{display:“flex”,gap:5,alignItems:“center”,flexShrink:0}},
+C(Badge,{color:RCOL[u.role]||BLU,bg:(RCOL[u.role]||BLU)+“18”},ROLES[u.role]),
+u.id!==p.currentUser.id?btn({onClick:function(){toggleActive(u.id);},style:{background:u.active?RLT:GLT,border:“none”,borderRadius:8,padding:“4px 9px”,fontSize:10,fontWeight:700,cursor:“pointer”,color:u.active?RED:GRN,fontFamily:SS}},u.active?“Deactivate”:“Activate”):null
+)
+);
+})
+)
+);
+}
+
+// === SETTINGS ===
+function Settings(p){
+var cu=p.currentUser;
+var s1=useState(cu.name),name=s1[0],setName=s1[1];
+var s2=useState(cu.email),email=s2[0],setEmail=s2[1];
+var s3=useState(cu.company||””),company=s3[0],setCompany=s3[1];
+function saveProfile(){
+var updated=Object.assign({},cu,{name:name,email:email,company:company});
+p.setCurrentUser(updated);
+lsSet(“nlcrm_session”,updated);
+p.setUsers(function(prev){return prev.map(function(u){return u.id===cu.id?Object.assign({},u,{name:name,email:email,company:company}):u;});});
+p.showToast(“Profile saved”);
+}
+return div({className:“fu”,style:{padding:“16px”,paddingBottom:110}},
+div({style:{fontSize:28,fontWeight:700,color:TXT,marginBottom:20,letterSpacing:”-0.04em”}},“Settings”),
+div({className:“ios-group”,style:{display:“flex”,gap:14,alignItems:“center”,padding:“18px”,marginBottom:24}},
+C(Avatar,{name:cu.name,size:54}),
+div(null,
+div({style:{fontSize:16,fontWeight:700,color:TXT}},cu.name),
+div({style:{fontSize:12,color:MUT,marginTop:3}},cu.email),
+C(Badge,{color:RCOL[cu.role]||BLU,bg:(RCOL[cu.role]||BLU)+“18”},ROLES[cu.role])
+)
+),
+C(SecT,null,“Edit Profile”),
+C(FRow,{label:“Name”},C(FInp,{value:name,onChange:setName,placeholder:“Your name”})),
+C(FRow,{label:“Email”},C(FInp,{value:email,onChange:setEmail,type:“email”,placeholder:“your@email.com”})),
+C(FRow,{label:“Company”},C(FInp,{value:company,onChange:setCompany,placeholder:“Company name”})),
+C(PrimaryBtn,{onClick:saveProfile},“Save Profile”),
+div({style:{height:1,background:BDR,margin:“20px 0”}}),
+C(SecT,null,“About”),
+C(Crd,null,
+[[“App”,“NortLaundry CRM v2.0”],[“Built for”,“Global Nortkem Marketing Inc.”],[“Location”,“Angeles City, Pampanga”],[“Tech”,“React 18 - No Build Step”]].map(function(r,i,arr){
+return div({key:r[0],style:{display:“flex”,justifyContent:“space-between”,padding:“10px 14px”,borderBottom:i<arr.length-1?“1px solid “+BDR:“none”}},
+sp({style:{color:MUT,fontSize:12}},r[0]),sp({style:{color:TXT,fontSize:12,fontWeight:600}},r[1])
+);
+})
+),
+div({style:{marginTop:24}}),
+btn({onClick:function(){lsDel(“nlcrm_session”);p.onSignOut();},style:{width:“100%”,padding:“16px”,borderRadius:14,border:“none”,background:RLT,color:RED,fontSize:17,fontWeight:500,cursor:“pointer”,fontFamily:SS,letterSpacing:”-0.01em”}},“Sign Out”)
+);
+}
+
+// === MAIN APP ===
+function NortLaundryCRM(){
+var s1=useState(null),currentUser=s1[0],setCurrentUser=s1[1];
+var s2=useState(“dashboard”),tab=s2[0],setTab=s2[1];
+var s3=useState(lsGet(“nlcrm_clients”)||[]),clients=s3[0],setClients=s3[1];
+var s4=useState(lsGet(“nlcrm_orders”)||[]),orders=s4[0],setOrders=s4[1];
+var s5=useState(lsGet(“nlcrm_invoices”)||[]),invoices=s5[0],setInvoices=s5[1];
+var s6=useState(lsGet(“nlcrm_staff”)||[]),staff=s6[0],setStaff=s6[1];
+var s7=useState(lsGet(“nlcrm_inventory”)||[]),inventory=s7[0],setInventory=s7[1];
+var s8=useState(lsGet(“nlcrm_users”)||[]),users=s8[0],setUsers=s8[1];
+var s9=useState(null),toast=s9[0],setToast=s9[1];
+var s10=useState(null),toastTimer=s10[0],setToastTimer=s10[1];
+
+useEffect(function(){
+var sess=lsGet(“nlcrm_session”);
+if(sess&&sess.userId){
+var allUsers=lsGet(“nlcrm_users”)||[];
+var u=allUsers.find(function(x){return x.id===sess.userId;});
+if(u&&u.active)setCurrentUser(sess);
+}
+},[]);
+
+useEffect(function(){if(clients.length>0)lsSet(“nlcrm_clients”,clients);},[clients]);
+useEffect(function(){if(orders.length>0)lsSet(“nlcrm_orders”,orders);},[orders]);
+useEffect(function(){if(invoices.length>0)lsSet(“nlcrm_invoices”,invoices);},[invoices]);
+useEffect(function(){if(staff.length>0)lsSet(“nlcrm_staff”,staff);},[staff]);
+useEffect(function(){if(inventory.length>0)lsSet(“nlcrm_inventory”,inventory);},[inventory]);
+useEffect(function(){if(users.length>0)lsSet(“nlcrm_users”,users);},[users]);
+
+function showToast(msg,type){
+if(toastTimer)clearTimeout(toastTimer);
+setToast({msg:msg,type:type||“success”});
+var t=setTimeout(function(){setToast(null);},3200);
+setToastTimer(t);
+}
+
+if(!currentUser){
+return C(AuthScreen,{onLogin:function(u){
+initData();
+setClients(lsGet(“nlcrm_clients”)||[]);
+setOrders(lsGet(“nlcrm_orders”)||[]);
+setInvoices(lsGet(“nlcrm_invoices”)||[]);
+setStaff(lsGet(“nlcrm_staff”)||[]);
+setInventory(lsGet(“nlcrm_inventory”)||[]);
+setUsers(lsGet(“nlcrm_users”)||[]);
+setCurrentUser(u);setTab(“dashboard”);
+}});
+}
+
+var sharedProps={currentUser:currentUser,clients:clients,orders:orders,invoices:invoices,staff:staff,inventory:inventory,users:users,setClients:setClients,setOrders:setOrders,setInvoices:setInvoices,setStaff:setStaff,setInventory:setInventory,setUsers:setUsers,showToast:showToast,setTab:setTab};
+
+var TABS=[
+{id:“dashboard”,label:“Home”,icon:“🏠”},
+{id:“orders”,label:“Orders”,icon:“📦”},
+{id:“clients”,label:“Clients”,icon:“👥”},
+{id:“billing”,label:“Billing”,icon:“💰”},
+{id:“inventory”,label:“Stock”,icon:“🧴”},
+{id:“staff”,label:“Staff”,icon:“👤”},
+{id:“reports”,label:“Reports”,icon:“📊”}
+];
+if(currentUser.role===“admin”)TABS.push({id:“users”,label:“Users”,icon:“🔒”});
+
+var pending=users.filter(function(u){return u.pendingApproval;}).length;
+
+return div({style:{display:“flex”,flexDirection:“column”,height:“100vh”,background:BG,maxWidth:600,margin:“0 auto”,position:“relative”,overflow:“hidden”}},
+C(Toast,toast||{}),
+div({style:{flex:1,overflowY:“auto”,WebkitOverflowScrolling:“touch”}},
+tab===“dashboard”?C(Dashboard,sharedProps):
+tab===“orders”?C(Orders,sharedProps):
+tab===“clients”?C(Clients,sharedProps):
+tab===“billing”?C(Billing,sharedProps):
+tab===“inventory”?C(Inventory,sharedProps):
+tab===“staff”?C(Staff,sharedProps):
+tab===“reports”?C(Reports,sharedProps):
+tab===“users”?C(UsersTab,sharedProps):
+tab===“settings”?C(Settings,Object.assign({},sharedProps,{setCurrentUser:setCurrentUser,onSignOut:function(){setCurrentUser(null);setTab(“dashboard”);}})):
+null
+),
+div({className:“ios-tab no-print”,style:{display:“flex”,paddingBottom:“env(safe-area-inset-bottom,0px)”,position:“sticky”,bottom:0,zIndex:200}},
+TABS.map(function(t){
+var active=tab===t.id;
+return btn({key:t.id,onClick:function(){setTab(t.id);},style:{flex:1,display:“flex”,flexDirection:“column”,alignItems:“center”,justifyContent:“center”,padding:“8px 4px 5px”,border:“none”,background:“transparent”,cursor:“pointer”,fontFamily:SS,position:“relative”,gap:1,minWidth:0}},
+div({style:{fontSize:22,lineHeight:1.2}},t.icon),
+div({style:{fontSize:10,color:active?BLU:MUT,fontWeight:active?600:400,letterSpacing:”-0.01em”,marginTop:2}},t.label),
+(t.id===“users”&&pending>0)?div({style:{position:“absolute”,top:5,right:“20%”,width:7,height:7,background:RED,borderRadius:“50%”}}):null
+);
+}).concat([
+btn({key:“settings”,onClick:function(){setTab(“settings”);},style:{flex:1,display:“flex”,flexDirection:“column”,alignItems:“center”,justifyContent:“center”,padding:“8px 2px 6px”,border:“none”,background:“transparent”,cursor:“pointer”,fontFamily:SS,gap:2}},
+div({style:{fontSize:22,lineHeight:1.2}},“⚙️”),
+div({style:{fontSize:10,color:tab===“settings”?BLU:MUT,fontWeight:tab===“settings”?600:400,letterSpacing:”-0.01em”,marginTop:2}})
+)
+])
+)
+);
+}
+
+// === BOOT ===
+initData();
+ReactDOM.createRoot(document.getElementById(“root”)).render(C(NortLaundryCRM));
+})();
+</script>
+
+</body>
+</html>
